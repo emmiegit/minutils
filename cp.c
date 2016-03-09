@@ -1,14 +1,13 @@
 #include <stdio.h>
 
 /* Usage: ./cp input output */
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     if (argc < 3) {
         return 1;
     }
 
-    FILE* ifh;
-    FILE* ofh;
+    FILE *ifh, *ofh;
     ifh = fopen(argv[1], "r");
     ofh = fopen(argv[2], "w+");
     if (!ifh || !ofh) {

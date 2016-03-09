@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 /* Usage: ./cat [file...] */
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     if (argc == 1) {
         int ch;
@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
     } else {
         int i;
         for (i = 1; i < argc; i++) {
-            FILE* fh;
+            FILE *fh;
             if (argv[i][0] == '-' && argv[i][1] == '\0') {
                 fh = stdin;
             } else {
