@@ -11,10 +11,15 @@ bin:
 
 bin/%: %.c
 	@echo '[CC] $(@F)'
-	@gcc $< -o $(@F)
+	@gcc $< $(EXTRA_FLAGS) -o $(@F)
 	@mv $(@F) -t bin
 
+debug:
+	@make EXTRA_FLAGS=-g
+
 force: clean all
+
+forcedebug: clean debug
 
 clean:
 	@echo '[RMDIR] bin'

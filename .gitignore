@@ -1,2 +1,4 @@
 bin
+.*.swp
+.ycm_extra_conf.py*
 
