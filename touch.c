@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 
 /* Usage: ./touch file */
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     if (argc < 2) {
         return 1;
@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
     struct utimbuf new_times;
 
     if (stat(argv[1], &statbuf) < 0) {
-        FILE* fh;
+        FILE *fh;
         fh = fopen(argv[1], "w+");
 
         if (fh == NULL) {

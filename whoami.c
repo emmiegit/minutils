@@ -5,10 +5,10 @@
 #include <sys/types.h>
 
 /* Usage: ./whoami */
-int main(int argc, char* argv[])
+int main()
 {
     uid_t uid = geteuid();
-    struct passwd* pw = getpwuid(uid);
+    struct passwd *pw = getpwuid(uid);
     if (pw == NULL) {
         return 1;
     }

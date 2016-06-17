@@ -1,9 +1,9 @@
 #include <stdio.h>
 
 /* Usage: ./tee [file...] */
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-    FILE* fh[argc - 1];
+    FILE *fh[argc - 1];
     int i;
     for (i = 0; i < argc - 1; i++) {
         if ((fh[i] = fopen(argv[i + 1], "w+")) == NULL) {
