@@ -5,128 +5,129 @@
 #define DEFAULT_LINE_CAPACITY 32
 #define DEFAULT_CHAR_CAPACITY 64
 
-struct line_list {
-    char **array;
-    size_t length;
-    size_t capacity;
-};
+struct {
+	char **array;
+	size_t length;
+	size_t capacity;
+} lines;
 
-struct char_list {
-    char *array;
-    size_t length;
-    size_t capacity;
-};
+struct {
+	char *array;
+	size_t length;
+	size_t capacity;
+} line;
 
-static void append_to_line_list(struct line_list *list, struct char_list *line);
-static void append_to_char_list(struct char_list *list, char ch);
+static void append_to_line_list();
+static void append_to_char_list(char ch);
 
 /* Usage: ./tac [file...] */
 int main(int argc, char *argv[])
 {
-    struct line_list lines;
-    lines.array = malloc(sizeof(char *) * DEFAULT_LINE_CAPACITY);
-    lines.length = 0;
-    lines.capacity = DEFAULT_LINE_CAPACITY;
+	int i;
+	lines.array = malloc(sizeof(char *) * DEFAULT_LINE_CAPACITY);
+	lines.length = 0;
+	lines.capacity = DEFAULT_LINE_CAPACITY;
 
-    struct char_list line;
-    line.array = malloc(sizeof(char) * DEFAULT_CHAR_CAPACITY);
-    line.length = 0;
-    line.capacity = DEFAULT_CHAR_CAPACITY;
+	line.array = malloc(sizeof(char) * DEFAULT_CHAR_CAPACITY);
+	line.length = 0;
+	line.capacity = DEFAULT_CHAR_CAPACITY;
 
-    if (lines.array == NULL) {
-        return 1;
-    }
+	if (lines.array == NULL) {
+		return 1;
+	}
 
-    if (argc == 1) {
-        int ch;
-        while ((ch = fgetc(stdin)) != EOF) {
-            if (ch != '\n') {
-                append_to_char_list(&line, ch);
-            } else {
-                append_to_line_list(&lines, &line);
-                line.length = 0;
-            }
-        }
+	if (argc == 1) {
+		int ch;
+		while ((ch = fgetc(stdin)) != EOF) {
+			if (ch != '\n') {
+				append_to_char_list(ch);
+			} else {
+				append_to_line_list();
+				line.length = 0;
+			}
+		}
 
-        append_to_line_list(&lines, &line);
-    } else {
-        int i;
-        for (i = 1; i < argc; i++) {
-            FILE *fh;
-            if (!strcmp(argv[i], "-")) {
-                fh = stdin;
-            } else {
-                fh = fopen(argv[i], "r");
-            }
+		append_to_line_list(&lines, &line);
+	} else {
+		for (i = 1; i < argc; i++) {
+			FILE *fh;
+			int ch;
+			if (!strcmp(argv[i], "-")) {
+				fh = stdin;
+			} else {
+				fh = fopen(argv[i], "r");
+			}
 
-            if (fh == NULL) {
-                return 1;
-            }
+			if (fh == NULL) {
+				return 1;
+			}
 
-            int ch;
-            while ((ch = fgetc(fh)) != EOF) {
-                if (ch != '\n') {
-                    append_to_char_list(&line, ch);
-                } else {
-                    append_to_line_list(&lines, &line);
-                    line.length = 0;
-                }
-            }
+			while ((ch = fgetc(fh)) != EOF) {
+				if (ch != '\n') {
+					append_to_char_list(ch);
+				} else {
+					append_to_line_list();
+					line.length = 0;
+				}
+			}
 
-            fclose(fh);
-            append_to_line_list(&lines, &line);
-        }
-    }
+			fclose(fh);
+			append_to_line_list(&lines, &line);
+		}
+	}
 
-    free(line.array);
+	free(line.array);
 
-    int i;
-    for (i = lines.length - 1; i >= 0; i--) {
-        printf("%s\n", lines.array[i]);
-    }
+	for (i = lines.length - 1; i >= 0; i--) {
+		printf("%s\n", lines.array[i]);
+	}
 
-    return 0;
+	return 0;
 }
 
-static void append_to_line_list(struct line_list *list, struct char_list *line)
+static void append_to_line_list()
 {
-    if (list->length >= list->capacity) {
-        size_t new_capacity = list->capacity * 2;
-        char **new_array = malloc(sizeof(char *) * new_capacity);
+	char *str;
+	if (lines.length >= lines.capacity) {
+		size_t new_capacity = lines.capacity * 2;
+		char **new_array = malloc(sizeof(char *) * new_capacity);
 
-        if (new_array == NULL) {
-            exit(1);
-        }
+		if (new_array == NULL) {
+			exit(1);
+		}
 
-        memcpy(new_array, list->array, sizeof(char *) * list->length);
-        free(list->array);
-        list->array = new_array;
-        list->capacity = new_capacity;
-    }
+		memcpy(new_array, lines.array, sizeof(char *) * lines.length);
+		free(lines.array);
+		lines.array = new_array;
+		lines.capacity = new_capacity;
+	}
 
-    char *string = malloc(sizeof(char) * line->length + 1);
-    memcpy(string, line->array, line->length);
-    string[line->length] = '\0';
+	str = malloc(line.length + 1);
+	if (!str) {
+		exit(1);
+	}
 
-    list->array[list->length++] = string;
+	memcpy(str, line.array, line.length);
+	str[line.length] = '\0';
+	lines.array[lines.length++] = str;
 }
 
-static void append_to_char_list(struct char_list *list, char ch)
+static void append_to_char_list(char ch)
 {
-    if (list->length >= list->capacity) {
-        size_t new_capacity = list->capacity * 2;
-        char *new_array = malloc(sizeof(char) * new_capacity);
+	if (line.length >= line.capacity) {
+		size_t new_capacity = line.capacity * 2;
+		char *new_array = malloc(sizeof(char) * new_capacity);
 
-        if (new_array == NULL) {
-            exit(1);
-        }
+		if (new_array == NULL) {
+			exit(-1);
+		}
 
-        memcpy(new_array, list->array, sizeof(char) * list->length);
-        free(list->array);
-        list->array = new_array;
-        list->capacity = new_capacity;
-    }
+		memcpy(new_array, line.array, sizeof(char) * line.length);
+		free(line.array);
+		line.array = new_array;
+		line.capacity = new_capacity;
+	}
 
-    list->array[list->length++] = ch;
+	line.array[line.length++] = ch;
 }
 

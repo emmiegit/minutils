@@ -5,13 +5,13 @@
 /* Usage: ./pwd */
 int main()
 {
-    char cwd[PATH_MAX];
-    if (getcwd(cwd, sizeof(cwd)) != NULL) {
-        printf("%s\n", cwd);
-    } else {
-        return 1;
-    }
+	char cwd[PATH_MAX];
+	if (getcwd(cwd, sizeof(cwd)) != NULL) {
+		printf("%s\n", cwd);
+	} else {
+		return 1;
+	}
 
-    return 0;
+	return 0;
 }
 

@@ -7,13 +7,13 @@
 /* Usage: ./whoami */
 int main()
 {
-    uid_t uid = geteuid();
-    struct passwd *pw = getpwuid(uid);
-    if (pw == NULL) {
-        return 1;
-    }
+	uid_t uid = geteuid();
+	struct passwd *pw = getpwuid(uid);
+	if (pw == NULL) {
+		return 1;
+	}
 
-    printf("%s\n", pw->pw_name);
-    return 0;
+	printf("%s\n", pw->pw_name);
+	return 0;
 }
 

@@ -3,7 +3,7 @@
 /* Usage ./sync */
 int main()
 {
-    sync();
-    return 0;
+	sync();
+	return 0;
 }
 

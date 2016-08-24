@@ -1,7 +1,9 @@
 .PHONY: all force clean
 
-SOURCES = $(wildcard *.c)
-TARGETS = $(patsubst %.c,bin/%,$(SOURCES))
+SOURCES := $(wildcard *.c)
+TARGETS := $(patsubst %.c,bin/%,$(SOURCES))
+
+FLAGS   := -ansi -Wall -Wextra -pedantic -Os -D_POSIX_C_SOURCE=200112 -D_XOPEN_SOURCE=500
 
 all: bin $(TARGETS)
 
@@ -11,7 +13,7 @@ bin:
 
 bin/%: %.c
 	@echo '[CC] $(@F)'
-	@gcc $< $(EXTRA_FLAGS) -o $(@F)
+	@$(CC) $(FLAGS) $(CFLAGS) $(EXTRA_FLAGS) -o $(@F) $<
 	@mv $(@F) -t bin
 
 debug:

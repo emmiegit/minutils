@@ -2,16 +2,18 @@
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2) {
-        for (;;) {
-            printf("yes\n");
-        }
-    } else {
-        for (;;) {
-            printf("%s\n", argv[1]);
-        }
-    }
+	const char *str;
 
-    return 0;
+	if (argc < 2) {
+		str = "yes";
+	} else {
+		str = argv[1];
+	}
+
+	while (1) {
+		puts(str);
+	}
+
+	return 0;
 }
 
