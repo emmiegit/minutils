@@ -1,35 +1,42 @@
-#include <stdio.h>
+#include <fcntl.h>
 #include <time.h>
+#include <unistd.h>
 #include <utime.h>
+
 #include <sys/stat.h>
+#include <sys/types.h>
 
 /* Usage: ./touch file */
 int main(int argc, char *argv[])
 {
 	struct stat statbuf;
 	struct utimbuf new_times;
+	time_t new_time;
+	int ret;
 
 	if (argc < 2) {
 		return 1;
 	}
 
-	if (stat(argv[1], &statbuf) < 0) {
-		FILE *fh;
-		fh = fopen(argv[1], "w+");
-
-		if (fh == NULL) {
+	ret = stat(argv[1], &statbuf);
+	if (ret) {
+		int fd = open(argv[1], O_CREAT | O_RDONLY, 0666);
+		if (fd < 0) {
 			return 1;
 		}
 
-		if (fclose(fh) == EOF) {
+		ret = close(fd);
+		if (ret) {
 			return 1;
 		}
 	}
 
-	new_times.actime = statbuf.st_atime;
-	new_times.modtime = time(NULL);
+	new_time = time(NULL);
+	new_times.actime = new_time;
+	new_times.modtime = new_time;
 
-	if (utime(argv[1], &new_times) < 0) {
+	ret = utime(argv[1], &new_times);
+	if (ret < 0) {
 		return 1;
 	}
 
