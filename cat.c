@@ -1,36 +1,40 @@
-#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
 
-/* Usage: ./cat [file...] */
-int main(int argc, char *argv[])
+static int cat(int fd)
 {
-	if (argc == 1) {
-		int ch;
-		while ((ch = fgetc(stdin)) != EOF) {
-			putc(ch, stdout);
-		}
-	} else {
-		int i;
-		for (i = 1; i < argc; i++) {
-			FILE *fh;
-			int ch;
-			if (argv[i][0] == '-' && argv[i][1] == '\0') {
-				fh = stdin;
-			} else {
-				fh = fopen(argv[i], "r");
-			}
+	char buffer[8192];
+	long n;
 
-			if (fh == NULL) {
-				return 1;
-			}
-
-			while ((ch = fgetc(fh)) != EOF) {
-				putc(ch, stdout);
-			}
-			fclose(fh);
+	while ((n = read(fd, buffer, sizeof(buffer))) > 0) {
+		if (write(1, buffer, n) != n) {
+			return 1;
 		}
 	}
 
 	return 0;
 }
 
+/* Usage: ./cat [file...] */
+int main(int argc, char *argv[])
+{
+	int i;
+
+	if (argc == 1) {
+		return cat(STDIN_FILENO);
+	} else for (i = 1; i < argc; i++) {
+		int ret, fd;
+		fd = open(argv[i], O_RDONLY);
+		if (fd < 0) {
+			return 1;
+		}
+		ret = cat(fd);
+		close(fd);
+		if (ret) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
 
