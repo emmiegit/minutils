@@ -52,8 +52,16 @@ static unsigned int parse_int(const char *argv0, const char *str)
 int main(int argc, const char *argv[])
 {
 	const char *path, *typestr;
+	enum {
+		DEV_BLOCK,
+		DEV_CHAR,
+		DEV_FIFO,
+		DEV_SOCK,
+		DEV_REGULAR
+	} type;
 	unsigned int major, minor;
 	mode_t mode;
+	dev_t dev;
 	int i;
 
 	mode = 0666;
@@ -77,27 +85,62 @@ int main(int argc, const char *argv[])
 		}
 	}
 
-	if (argc != i + 4) {
+	dev = 0;
+	switch (argc - i) {
+	default:
 		fprintf(stderr, "usage: %s [option]... name type [major minor]\n",
 			argv[0]);
 		return 1;
-	} else {
-		path = argv[i];
-		typestr = argv[i + 1];
+	case 4:
 		major = parse_int(argv[0], argv[i + 2]);
 		minor = parse_int(argv[0], argv[i + 3]);
+		dev = makedev(major, minor);
+		/* FALLTHROUGH */
+	case 2:
+		path = argv[i];
+		typestr = argv[i + 1];
 	}
 
 	if (!strcmp("b", typestr)) {
+		type = DEV_BLOCK;
 		mode |= S_IFBLK;
 	} else if (!strcmp("c", typestr) || !strcmp("u", typestr)) {
+		type = DEV_CHAR;
 		mode |= S_IFCHR;
+	} else if (!strcmp("p", typestr)) {
+		type = DEV_FIFO;
+		mode |= S_IFIFO;
+	} else if (!strcmp("s", typestr)) {
+		fputs("warn: attempt to create socket\n", stderr);
+		type = DEV_SOCK;
+		mode |= S_IFSOCK;
+	} else if (!strcmp("f", typestr)) {
+		type = DEV_REGULAR;
+		mode |= S_IFREG;
 	} else {
 		fprintf(stderr, "%s: unknown file type: %s\n",
 			argv[0], argv[i]);
 		return 1;
 	}
-	if (mknod(path, mode, makedev(major, minor))) {
+
+	switch (type) {
+	case DEV_BLOCK:
+	case DEV_CHAR:
+		if (argc != i + 4) {
+			fprintf(stderr, "%s: no major/minor specified\n", argv[0]);
+			return 1;
+		}
+		break;
+	case DEV_FIFO:
+	case DEV_SOCK:
+	case DEV_REGULAR:
+		if (argc != i + 2) {
+			fprintf(stderr, "%s: extra operands\n", argv[0]);
+			return 1;
+		}
+	}
+
+	if (mknod(path, mode, dev)) {
 		fprintf(stderr, "%s: %s: %s\n",
 			argv[0], path, strerror(errno));
 		return 1;
