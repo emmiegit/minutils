@@ -1,5 +1,7 @@
 #include <sys/types.h>
 #include <dirent.h>
+
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -7,13 +9,15 @@ static struct {
 	int all;
 } opt;
 
-static int list(const char *path)
+static int list(const char *argv0, const char *path)
 {
 	DIR *dh;
 	struct dirent *ent;
 
 	dh = opendir(path);
 	if (!dh) {
+		fprintf(stderr, "%s: %s: %s\n",
+			argv0, path, strerror(errno));
 		return 1;
 	}
 	while ((ent = readdir(dh))) {
@@ -23,6 +27,8 @@ static int list(const char *path)
 		printf("%s\n", ent->d_name);
 	}
 	if (closedir(dh)) {
+		fprintf(stderr, "%s: %s: %s\n",
+			argv0, path, strerror(errno));
 		return 1;
 	}
 	return 0;
@@ -39,17 +45,25 @@ int main(int argc, const char *argv[])
 		} else if (!strcmp(argv[i], "-a")) {
 			opt.all = 1;
 		} else {
+			fprintf(stderr, "%s: invalid argument: %s\n",
+				argv[0], argv[i]);
 			return 1;
 		}
 	}
 
 	if (i == argc) {
-		list(".");
+		if (list(argv[0], ".")) {
+			return 1;
+		}
 	} else if (i == argc - 1) {
-		list(argv[i]);
+		if (list(argv[0], argv[i])) {
+			return 1;
+		}
 	} else for (; i < argc; i++) {
 		printf("%s:\n\n", argv[i]);
-		list(argv[i]);
+		if (list(argv[0], argv[i])) {
+			return 1;
+		}
 	}
 	return 0;
 }

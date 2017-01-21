@@ -2,8 +2,11 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
-#include <stdio.h>
 #include <unistd.h>
+
+#include <errno.h>
+#include <stdio.h>
+#include <string.h>
 
 static int mmap_copy(int ifd, int ofd)
 {
@@ -46,23 +49,26 @@ static int buffer_copy(int ifd, int ofd)
 	return 0;
 }
 
-/* Usage: ./cp input output */
+/* Usage: ./cp files... dest */
 int main(int argc, char *argv[])
 {
 	int ifd, ofd, ret;
 
 	if (argc != 3) {
-		fprintf(stderr, "%s: missing operand\n",
-			argv[0]);
+		fprintf(stderr, "usage: %s input output\n", argv[0]);
 		return 1;
 	}
 
 	ifd = open(argv[1], O_RDONLY);
 	if (ifd < 0) {
+		fprintf(stderr, "%s: %s: %s\n",
+			argv[0], argv[1], strerror(errno));
 		return 1;
 	}
 	ofd = open(argv[2], O_CREAT | O_TRUNC | O_WRONLY, 0666);
 	if (ofd < 0) {
+		fprintf(stderr, "%s: %s: %s\n",
+			argv[0], argv[2], strerror(errno));
 		return 1;
 	}
 

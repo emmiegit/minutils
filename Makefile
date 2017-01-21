@@ -3,9 +3,13 @@
 SOURCES := $(wildcard *.c)
 TARGETS := $(patsubst %.c,bin/%,$(SOURCES))
 
-FLAGS   := -ansi -pedantic -Wall -Wextra -Wshadow -Wmissing-prototypes -Os
+FLAGS   := -ansi -pedantic -Wall -Wextra -Wshadow -Wmissing-prototypes
 
+all: CFLAGS += -Os
 all: bin $(TARGETS)
+
+debug: CFLAGS += -g
+debug: bin $(TARGETS)
 
 bin:
 	@echo '[MKDIR] bin'
@@ -13,15 +17,8 @@ bin:
 
 bin/%: %.c
 	@echo '[CC] $(@F)'
-	@$(CC) $(FLAGS) $(CFLAGS) $(EXTRA_FLAGS) -o $(@F) $<
+	@$(CC) $(FLAGS) $(CFLAGS) -o $(@F) $<
 	@mv $(@F) -t bin
-
-debug:
-	@make EXTRA_FLAGS=-g
-
-force: clean all
-
-forcedebug: clean debug
 
 clean:
 	@echo '[RMDIR] bin'
