@@ -48,6 +48,11 @@ static int multi_link(const char *argv0, int count, const char *files[])
 			char *copy, *destfn;
 
 			copy = strdup(files[i]);
+			if (!copy) {
+				fprintf(stderr, "%s: %s\n",
+					argv0, strerror(errno));
+				return 1;
+			}
 			destfn = basename(copy);
 			if (symlinkat(files[i], destfd, destfn)) {
 				fprintf(stderr, "%s: %s: %s\n",
@@ -62,6 +67,11 @@ static int multi_link(const char *argv0, int count, const char *files[])
 			char *copy, *destfn;
 
 			copy = strdup(files[i]);
+			if (!copy) {
+				fprintf(stderr, "%s: %s\n",
+					argv0, strerror(errno));
+				return 1;
+			}
 			destfn = basename(copy);
 			if (linkat(AT_FDCWD, files[i], destfd, destfn, 0)) {
 				fprintf(stderr, "%s: %s: %s\n",
