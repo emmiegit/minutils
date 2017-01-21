@@ -2,18 +2,23 @@
 
 int main(int argc, char *argv[])
 {
-	const char *str;
-
 	if (argc == 1) {
-		str = "yes";
+		while (1) {
+			puts("yes");
+		}
 	} else {
-		str = argv[1];
-	}
+		while (1) {
+			int i;
 
-	while (1) {
-		puts(str);
+			for (i = 1; i < argc; i++) {
+				fputs(argv[i], stdout);
+				if (i < argc - 1) {
+					putchar(' ');
+				}
+			}
+			putchar('\n');
+		}
 	}
-
 	return 0;
 }
 

@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE		200112L
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,10 +33,14 @@ int main(int argc, char *argv[], const char *environ[])
 		val[0] = '\0';
 		val++;
 		if (setenv(argv[i], val, 1)) {
+			fprintf(stderr, "%s: %s\n",
+				argv[0], strerror(errno));
 			return 1;
 		}
 	}
 	if (execvp(argv[i], argv + i)) {
+		fprintf(stderr, "%s: %s\n",
+			argv[0], strerror(errno));
 		return 1;
 	}
 	return 0;

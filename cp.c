@@ -52,6 +52,8 @@ int main(int argc, char *argv[])
 	int ifd, ofd, ret;
 
 	if (argc != 3) {
+		fprintf(stderr, "%s: missing operand\n",
+			argv[0]);
 		return 1;
 	}
 
