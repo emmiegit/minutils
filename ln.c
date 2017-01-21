@@ -109,7 +109,7 @@ int main(int argc, const char *argv[])
 		}
 		break;
 	default:
-		if (multi_link(argv[0], argc - 1, argv + i)) {
+		if (multi_link(argv[0], argc - i, argv + i)) {
 			return 1;
 		}
 	}
