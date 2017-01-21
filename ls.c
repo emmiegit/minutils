@@ -1,3 +1,4 @@
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
 
@@ -9,10 +10,29 @@ static struct {
 	int all;
 } opt;
 
-static int list(const char *argv0, const char *path)
+static int list(const char *argv0, const char *path, int label)
 {
-	DIR *dh;
+	static int notfirst;
+	struct stat statbuf;
 	struct dirent *ent;
+	DIR *dh;
+
+	if (stat(path, &statbuf)) {
+		fprintf(stderr, "%s: unable to stat %s: %s\n",
+			argv0, path, strerror(errno));
+		return 1;
+	}
+	if (!S_ISDIR(statbuf.st_mode)) {
+		printf("%s\n", path);
+		return 0;
+	}
+	if (label) {
+		if (notfirst) {
+			putchar('\n');
+		}
+		notfirst = 1;
+		printf("%s:\n", path);
+	}
 
 	dh = opendir(path);
 	if (!dh) {
@@ -52,16 +72,15 @@ int main(int argc, const char *argv[])
 	}
 
 	if (i == argc) {
-		if (list(argv[0], ".")) {
+		if (list(argv[0], ".", 0)) {
 			return 1;
 		}
 	} else if (i == argc - 1) {
-		if (list(argv[0], argv[i])) {
+		if (list(argv[0], argv[i], 0)) {
 			return 1;
 		}
 	} else for (; i < argc; i++) {
-		printf("%s:\n\n", argv[i]);
-		if (list(argv[0], argv[i])) {
+		if (list(argv[0], argv[i], 1)) {
 			return 1;
 		}
 	}
