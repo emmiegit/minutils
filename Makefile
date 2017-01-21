@@ -3,7 +3,7 @@
 SOURCES := $(wildcard *.c)
 TARGETS := $(patsubst %.c,bin/%,$(SOURCES))
 
-FLAGS   := -ansi -Wall -Wextra -pedantic -Os -D_POSIX_C_SOURCE=200112 -D_XOPEN_SOURCE=500
+FLAGS   := -ansi -pedantic -Wall -Wextra -Wshadow -Wmissing-prototypes -Os
 
 all: bin $(TARGETS)
 
