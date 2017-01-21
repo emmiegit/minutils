@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 	if (ifd < 0) {
 		return 1;
 	}
-	ofd = open(argv[2], O_CREAT | O_TRUNC | O_WRONLY, S_IRWXU | S_IRWXG | S_IRWXO);
+	ofd = open(argv[2], O_CREAT | O_TRUNC | O_WRONLY, 0666);
 	if (ofd < 0) {
 		return 1;
 	}
