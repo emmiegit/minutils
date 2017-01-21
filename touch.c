@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 	time_t new_time;
 	int ret;
 
-	if (argc < 2) {
+	if (argc == 1) {
 		return 1;
 	}
 

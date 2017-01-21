@@ -4,7 +4,7 @@ int main(int argc, char *argv[])
 {
 	const char *str;
 
-	if (argc < 2) {
+	if (argc == 1) {
 		str = "yes";
 	} else {
 		str = argv[1];
