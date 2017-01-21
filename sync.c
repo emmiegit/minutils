@@ -3,6 +3,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <errno.h>
+#include <stdio.h>
+#include <string.h>
+
 /* Usage ./sync [path...] */
 int main(int argc, const char *argv[])
 {
@@ -15,16 +19,20 @@ int main(int argc, const char *argv[])
 
 		fd = open(argv[i], O_WRONLY);
 		if (fd < 0) {
-			return 1;
+			goto fail;
 		}
 		if (fsync(fd)) {
-			return 1;
+			goto fail;
 		}
 		if (close(fd)) {
-			return 1;
+			goto fail;
 		}
 	}
 
 	return 0;
+fail:
+	fprintf(stderr, "%s: %s: %s\n",
+		argv[0], argv[i], strerror(errno));
+	return 1;
 }
 

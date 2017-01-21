@@ -1,5 +1,3 @@
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <utime.h>
@@ -11,16 +9,9 @@
 
 static int touch(const char *argv0, const char *path)
 {
-	struct stat statbuf;
 	struct utimbuf new_times;
 	time_t new_time;
 	int fd;
-
-	if (stat(path, &statbuf)) {
-		fprintf(stderr, "%s: %s: %s\n",
-			argv0, path, strerror(errno));
-		return 1;
-	}
 
 	fd = open(path, O_CREAT | O_RDONLY, 0666);
 	if (fd < 0) {

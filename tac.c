@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,7 +18,7 @@ static struct {
 	size_t capacity;
 } line;
 
-static void append_to_line_list(void)
+static void append_to_line_list(const char *argv0)
 {
 	char *str;
 	if (lines.length >= lines.capacity) {
@@ -27,6 +28,8 @@ static void append_to_line_list(void)
 		new_capacity = lines.capacity * 2;
 		ptr = realloc(lines.array, sizeof(char *) * new_capacity);
 		if (!ptr) {
+			fprintf(stderr, "%s: %s\n",
+				argv0, strerror(errno));
 			exit(-1);
 		}
 		lines.array = ptr;
@@ -35,6 +38,8 @@ static void append_to_line_list(void)
 
 	str = malloc(line.length + 1);
 	if (!str) {
+		fprintf(stderr, "%s: %s\n",
+			argv0, strerror(errno));
 		exit(1);
 	}
 
@@ -43,7 +48,7 @@ static void append_to_line_list(void)
 	lines.array[lines.length++] = str;
 }
 
-static void append_to_char_list(char ch)
+static void append_to_char_list(const char *argv0, char ch)
 {
 	if (line.length >= line.capacity) {
 		void *ptr;
@@ -52,6 +57,8 @@ static void append_to_char_list(char ch)
 		new_capacity = lines.capacity * 2;
 		ptr = realloc(line.array, sizeof(char) * new_capacity);
 		if (!ptr) {
+			fprintf(stderr, "%s: %s\n",
+				argv0, strerror(errno));
 			exit(-1);
 		}
 		line.array = ptr;
@@ -74,6 +81,8 @@ int main(int argc, char *argv[])
 	line.capacity = DEFAULT_CHAR_CAPACITY;
 
 	if (!lines.array) {
+		fprintf(stderr, "%s: %s\n",
+			argv[0], strerror(errno));
 		return 1;
 	}
 	if (argc == 1) {
@@ -81,13 +90,13 @@ int main(int argc, char *argv[])
 
 		while ((ch = fgetc(stdin)) != EOF) {
 			if (ch != '\n') {
-				append_to_char_list(ch);
+				append_to_char_list(argv[0], ch);
 			} else {
-				append_to_line_list();
+				append_to_line_list(argv[0]);
 				line.length = 0;
 			}
 		}
-		append_to_line_list();
+		append_to_line_list(argv[0]);
 	} else {
 		for (i = 1; i < argc; i++) {
 			FILE *fh;
@@ -104,16 +113,18 @@ int main(int argc, char *argv[])
 			}
 			while ((ch = fgetc(fh)) != EOF) {
 				if (ch != '\n') {
-					append_to_char_list(ch);
+					append_to_char_list(argv[0], ch);
 				} else {
-					append_to_line_list();
+					append_to_line_list(argv[0]);
 					line.length = 0;
 				}
 			}
 			if (fclose(fh)) {
+				fprintf(stderr, "%s: %s\n",
+					argv[0], strerror(errno));
 				return 1;
 			}
-			append_to_line_list();
+			append_to_line_list(argv[0]);
 		}
 	}
 
