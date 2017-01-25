@@ -65,6 +65,7 @@ static int do_readlink(const char *path)
 	return 0;
 }
 
+/* Usage: ./readlink [-n] [PATH...] */
 int main(int argc, const char *argv[])
 {
 	int i, ret;
@@ -96,4 +97,3 @@ int main(int argc, const char *argv[])
 	}
 	return ret;
 }
-
