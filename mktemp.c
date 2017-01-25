@@ -38,7 +38,7 @@ static int replace_dir(const char *path)
 	return 0;
 }
 
-/* Usage: ./mktemp [-d] template */
+/* Usage: ./mktemp [-d] TEMPLATE */
 int main(int argc, char *argv[])
 {
 	char *template;
@@ -84,4 +84,3 @@ int main(int argc, char *argv[])
 	puts(template);
 	return 0;
 }
-

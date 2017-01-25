@@ -122,7 +122,7 @@ static void which(const char *program)
 	}
 }
 
-/* Usage: ./which [-a] program... */
+/* Usage: ./which [-a] PROGRAM... */
 int main(int argc, const char *argv[])
 {
 	int i;

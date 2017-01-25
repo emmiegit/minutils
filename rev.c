@@ -69,7 +69,7 @@ static void append_to_char_list(char ch)
 	line.array[line.length++] = ch;
 }
 
-/* Usage: ./tac [file...] */
+/* Usage: ./tac [FILE...] */
 int main(int argc, char *argv[])
 {
 	int i;
@@ -136,4 +136,5 @@ int main(int argc, char *argv[])
 	}
 	return 0;
 }
+
 

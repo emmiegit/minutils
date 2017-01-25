@@ -104,7 +104,7 @@ static off_t parse_size(void)
 	return value;
 }
 
-/* ./truncate [-c] [-s=SIZE] file... */
+/* ./truncate [-c] [-s=SIZE] FILE... */
 int main(int argc, char *argv[])
 {
 	off_t length;
@@ -153,4 +153,3 @@ int main(int argc, char *argv[])
 	}
 	return 0;
 }
-

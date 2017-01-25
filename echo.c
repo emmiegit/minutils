@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-/* Usage: ./echo [text-to-print...] */
+/* Usage: ./echo [TEXT...] */
 int main(int argc, char *argv[])
 {
 	int i;
@@ -18,4 +18,3 @@ int main(int argc, char *argv[])
 	putchar('\n');
 	return 0;
 }
-

@@ -56,7 +56,7 @@ static int list(const char *path, int label)
 	return 0;
 }
 
-/* Usage: ls [-a] [path...] */
+/* Usage: ls [-a] [PATH...] */
 int main(int argc, const char *argv[])
 {
 	int i;
@@ -89,4 +89,3 @@ int main(int argc, const char *argv[])
 	}
 	return 0;
 }
-

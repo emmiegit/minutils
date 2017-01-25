@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-/* Usage: ./sleep seconds */
+/* Usage: ./sleep SECONDS */
 int main(int argc, const char *argv[])
 {
 	char *ptr;
@@ -24,4 +24,3 @@ int main(int argc, const char *argv[])
 	}
 	return 0;
 }
-

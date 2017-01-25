@@ -49,7 +49,7 @@ static int buffer_copy(int ifd, int ofd)
 	return 0;
 }
 
-/* Usage: ./cp files... dest */
+/* Usage: ./cp FILES... DEST */
 int main(int argc, char *argv[])
 {
 	int ifd, ofd, ret;
@@ -81,4 +81,3 @@ int main(int argc, char *argv[])
 	}
 	return ret;
 }
-

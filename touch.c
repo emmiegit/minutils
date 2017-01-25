@@ -37,7 +37,7 @@ static int touch(const char *path)
 	return 0;
 }
 
-/* Usage: ./touch file... */
+/* Usage: ./touch FILE... */
 int main(int argc, char *argv[])
 {
 	int i;
@@ -54,4 +54,3 @@ int main(int argc, char *argv[])
 	}
 	return 0;
 }
-

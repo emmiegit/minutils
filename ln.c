@@ -1,4 +1,3 @@
-#define _XOPEN_SOURCE		500
 #define _POSIX_C_SOURCE		200809L
 
 #include <sys/stat.h>
@@ -87,7 +86,7 @@ static int multi_link(int count, const char *files[])
 	return 0;
 }
 
-/* Usage: ./ln [-s] source... dest */
+/* Usage: ./ln [-s] SOURCE... DEST */
 int main(int argc, const char *argv[])
 {
 	int i;
@@ -126,4 +125,3 @@ int main(int argc, const char *argv[])
 	}
 	return 0;
 }
-

@@ -22,8 +22,8 @@ static int cat(int fd)
 	return 0;
 }
 
-/* Usage: ./cat [file...] */
-int main(int argc, char *argv[])
+/* Usage: ./cat [FILE...] */
+int main(int argc, const char *argv[])
 {
 	int i;
 
@@ -50,4 +50,3 @@ int main(int argc, char *argv[])
 	}
 	return 0;
 }
-

@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
-/* Usage ./sync [path...] */
+/* Usage ./sync [PATH...] */
 int main(int argc, const char *argv[])
 {
 	int i;
@@ -35,4 +35,3 @@ fail:
 		argv[0], argv[i], strerror(errno));
 	return 1;
 }
-

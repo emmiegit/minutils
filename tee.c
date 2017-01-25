@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Usage: ./tee [file...] */
+/* Usage: ./tee [FILE...] */
 int main(int argc, char *argv[])
 {
 	char buf[4096];
@@ -46,4 +46,3 @@ int main(int argc, char *argv[])
 	free(fds);
 	return ret;
 }
-

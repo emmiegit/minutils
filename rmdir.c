@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+/* Usage: ./rmdir [PATH...] */
 int main(int argc, const char *argv[])
 {
 	int i;
@@ -22,4 +23,3 @@ int main(int argc, const char *argv[])
 	}
 	return 0;
 }
-

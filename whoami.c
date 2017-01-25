@@ -26,4 +26,3 @@ int main(int argc, const char *argv[])
 	printf("%s\n", pw->pw_name);
 	return 0;
 }
-

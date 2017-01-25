@@ -78,7 +78,7 @@ static void print_vars(int len, const char *names[])
 	exit(ret);
 }
 
-/* Usage: ./printenv [-0] [variable...] */
+/* Usage: ./printenv [-0] [VARIABLE...] */
 int main(int argc, const char *argv[], const char *environ[])
 {
 	int i;
