@@ -129,7 +129,7 @@ static int delete(const char *argv0, char *path)
 	memset(base, '0', len);
 	base[len] = '\0';
 
-	/* Shrink file size */
+	/* Shrink filename size */
 	while (len > 1) {
 		len--;
 		base2[len] = '\0';
