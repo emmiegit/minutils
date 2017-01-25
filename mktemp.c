@@ -10,7 +10,7 @@
 #include <string.h>
 
 static struct {
-	int dir;
+	unsigned dir : 1;
 } opt;
 
 static int get_suffix(const char *str)

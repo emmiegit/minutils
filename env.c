@@ -11,7 +11,7 @@ static void print_env(const char *environ[])
 	const char **env;
 
 	for (env = environ; *env; env++) {
-		printf("%s\n", *env);
+		puts(*env);
 	}
 }
 

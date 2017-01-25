@@ -5,11 +5,11 @@
 #include <string.h>
 
 static struct {
-	int sys;
-	int node;
-	int release;
-	int version;
-	int machine;
+	unsigned sys     : 1;
+	unsigned node    : 1;
+	unsigned release : 1;
+	unsigned version : 1;
+	unsigned machine : 1;
 } opt;
 
 /* Usage: ./uname [-a] [-s] [-n] [-r] [-v] [-m] */

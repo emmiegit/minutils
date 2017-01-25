@@ -7,7 +7,7 @@
 #include <string.h>
 
 static struct {
-	int all;
+	unsigned all : 1;
 } opt;
 
 static int list(const char *argv0, const char *path, int label)

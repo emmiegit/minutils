@@ -17,9 +17,10 @@
 #define DEFAULT_ITERS	3
 
 static struct {
-	int delete;
-	int zero;
 	unsigned int iters;
+
+	unsigned delete : 1;
+	unsigned zero   : 1;
 } opt;
 
 static const char *patterns[] = {
