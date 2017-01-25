@@ -88,7 +88,7 @@ static void setup(int i, int argc, const char *argv[])
 			max = len;
 		}
 	}
-	split_paths(argv[0], max + 1);
+	split_paths(argv[0], max + 2);
 }
 
 static void which(const char *program)
