@@ -4,6 +4,8 @@
 #include <string.h>
 
 static struct {
+	const char *argv0;
+
 	unsigned null : 1;
 } opt;
 
@@ -18,7 +20,7 @@ static int putnull(const char *str)
 	return 0;
 }
 
-static void print_all(const char *argv0, const char *environ[])
+static void print_all(const char *environ[])
 {
 	int (*print_func)(const char *);
 
@@ -26,7 +28,7 @@ static void print_all(const char *argv0, const char *environ[])
 	while (*environ) {
 		if (print_func(*environ++) == EOF) {
 			fprintf(stderr, "%s: error while writing\n",
-				argv0);
+				opt.argv0);
 			exit(1);
 		}
 	}
@@ -44,7 +46,7 @@ static char *format_var(const char *key, const char *val)
 	return buf;
 }
 
-static void print_vars(const char *argv0, int len, const char *names[])
+static void print_vars(int len, const char *names[])
 {
 	int (*print_func)(const char *);
 	int i, ret;
@@ -63,12 +65,12 @@ static void print_vars(const char *argv0, int len, const char *names[])
 		buf = format_var(names[i], value);
 		if (!buf) {
 			fprintf(stderr, "%s: unable to allocate: %s\n",
-				argv0, strerror(errno));
+				opt.argv0, strerror(errno));
 			exit(1);
 		}
 		if (print_func(buf) == EOF) {
 			fprintf(stderr, "%s: error while writing\n",
-				argv0);
+				opt.argv0);
 			exit(1);
 		}
 		free(buf);
@@ -81,6 +83,7 @@ int main(int argc, const char *argv[], const char *environ[])
 {
 	int i;
 
+	opt.argv0 = argv[0];
 	for (i = 1; i < argc; i++) {
 		if (argv[i][0] != '-') {
 			break;
@@ -94,9 +97,9 @@ int main(int argc, const char *argv[], const char *environ[])
 	}
 
 	if (i == argc) {
-		print_all(argv[0], environ);
+		print_all(environ);
 	} else {
-		print_vars(argv[0], argc - i, argv + i);
+		print_vars(argc - i, argv + i);
 	}
 	return 0;
 }

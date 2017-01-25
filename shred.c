@@ -17,6 +17,7 @@
 #define DEFAULT_ITERS	3
 
 static struct {
+	const char *argv0;
 	unsigned int iters;
 
 	unsigned delete : 1;
@@ -95,7 +96,7 @@ static void fill_buffer(char *buf, size_t len)
 	memcpy(buf, pattern, remain);
 }
 
-static int delete(const char *argv0, char *path)
+static int delete(char *path)
 {
 	char *dir, *base, *base2;
 	size_t len;
@@ -107,14 +108,14 @@ static int delete(const char *argv0, char *path)
 	dirfd = open(dir, O_RDONLY);
 	if (dirfd < 0) {
 		fprintf(stderr, "%s: %s: %s\n",
-			argv0, dir, strerror(errno));
+			opt.argv0, dir, strerror(errno));
 		return 1;
 	}
 	len = strlen(base);
 	base2 = malloc(len + 1);
 	if (!base2) {
 		fprintf(stderr, "%s: %s\n",
-			argv0, strerror(errno));
+			opt.argv0, strerror(errno));
 		return 1;
 	}
 
@@ -123,7 +124,7 @@ static int delete(const char *argv0, char *path)
 	base2[len] = '\0';
 	if (renameat(dirfd, base, dirfd, base2)) {
 		fprintf(stderr, "%s: %s/%s: %s\n",
-			argv0, dir, base, strerror(errno));
+			opt.argv0, dir, base, strerror(errno));
 		return 1;
 	}
 	memset(base, '0', len);
@@ -135,7 +136,7 @@ static int delete(const char *argv0, char *path)
 		base2[len] = '\0';
 		if (renameat(dirfd, base, dirfd, base2)) {
 			fprintf(stderr, "%s: %s/%s: %s\n",
-				argv0, dir, base2, strerror(errno));
+				opt.argv0, dir, base2, strerror(errno));
 			return 1;
 		}
 		base[len] = '\0';
@@ -144,20 +145,20 @@ static int delete(const char *argv0, char *path)
 	/* Finally delete */
 	if (unlinkat(dirfd, base2, 0)) {
 		fprintf(stderr, "%s: %s/%s: %s\n",
-			argv0, dir, base2, strerror(errno));
+			opt.argv0, dir, base2, strerror(errno));
 		return 1;
 	}
 
 	free(base2);
 	if (close(dirfd)) {
 		fprintf(stderr, "%s: %s: %s\n",
-			argv0, dir, strerror(errno));
+			opt.argv0, dir, strerror(errno));
 		return 1;
 	}
 	return 0;
 }
 
-static int shred(const char *argv0, char *path)
+static int shred(char *path)
 {
 	void *buf;
 	unsigned int i;
@@ -167,13 +168,13 @@ static int shred(const char *argv0, char *path)
 	fd = open(path, O_RDWR);
 	if (fd < 0) {
 		fprintf(stderr, "%s: %s: %s\n",
-			argv0, path, strerror(errno));
+			opt.argv0, path, strerror(errno));
 		return 1;
 	}
 	len = lseek(fd, 0, SEEK_END);
 	if (len < 0) {
 		fprintf(stderr, "%s: %s: %s\n",
-			argv0, path, strerror(errno));
+			opt.argv0, path, strerror(errno));
 		return 1;
 	} else if (len == 0) {
 		return 0;
@@ -182,7 +183,7 @@ static int shred(const char *argv0, char *path)
 	buf = mmap(NULL, len, PROT_WRITE, MAP_SHARED, fd, 0);
 	if (buf == MAP_FAILED) {
 		fprintf(stderr, "%s: mmap failed: %s\n",
-			argv0, strerror(errno));
+			opt.argv0, strerror(errno));
 		return 1;
 	}
 
@@ -190,7 +191,7 @@ static int shred(const char *argv0, char *path)
 		fill_buffer(buf, sizeof(buf));
 		if (fsync(fd)) {
 			fprintf(stderr, "%s: %s: %s\n",
-				argv0, path, strerror(errno));
+				opt.argv0, path, strerror(errno));
 			return 1;
 		}
 	}
@@ -199,21 +200,21 @@ static int shred(const char *argv0, char *path)
 	}
 	if (munmap(buf, len)) {
 		fprintf(stderr, "%s: unmap failed: %s\n",
-			argv0, strerror(errno));
+			opt.argv0, strerror(errno));
 		return 1;
 	}
 	if (close(fd)) {
 		fprintf(stderr, "%s: %s: %s\n",
-			argv0, path, strerror(errno));
+			opt.argv0, path, strerror(errno));
 		return 1;
 	}
 	if (opt.delete) {
-		return delete(argv0, path);
+		return delete(path);
 	}
 	return 0;
 }
 
-static unsigned int parse_int(const char *argv0, const char *str)
+static unsigned int parse_int(const char *str)
 {
 	char *ptr;
 	long value;
@@ -221,12 +222,12 @@ static unsigned int parse_int(const char *argv0, const char *str)
 	value = strtol(str, &ptr, 10);
 	if (*ptr) {
 		fprintf(stderr, "%s: invalid number: %s\n",
-			argv0, str);
+			opt.argv0, str);
 		exit(1);
 	}
 	if (value < 0) {
 		fprintf(stderr, "%s: number is negative: %s\n",
-			argv0, str);
+			opt.argv0, str);
 		exit(1);
 	}
 	return value;
@@ -239,6 +240,7 @@ int main(int argc, char *argv[])
 
 	srandom(time(NULL));
 
+	opt.argv0 = argv[0];
 	opt.iters = DEFAULT_ITERS;
 	for (i = 1; i < argc; i++) {
 		if (argv[i][0] != '-') {
@@ -248,7 +250,7 @@ int main(int argc, char *argv[])
 		} else if (!strcmp(argv[i], "-z")) {
 			opt.zero = 1;
 		} else if (!strncmp(argv[i], "-n=", 3)) {
-			opt.iters = parse_int(argv[0], argv[i] + 3);
+			opt.iters = parse_int(argv[i] + 3);
 		} else {
 			fprintf(stderr, "%s: invalid argument: %s\n",
 				argv[0], argv[i]);
@@ -268,7 +270,7 @@ int main(int argc, char *argv[])
 	}
 
 	for (; i < argc; i++) {
-		if (shred(argv[0], argv[i])) {
+		if (shred(argv[i])) {
 			return 1;
 		}
 	}

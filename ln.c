@@ -13,7 +13,9 @@
 #include <string.h>
 
 static struct {
-	int symbolic;
+	const char *argv0;
+
+	unsigned symbolic : 1;
 } opt;
 
 static int single_link(const char *source, const char *dest)
@@ -25,7 +27,7 @@ static int single_link(const char *source, const char *dest)
 	}
 }
 
-static int multi_link(const char *argv0, int count, const char *files[])
+static int multi_link(int count, const char *files[])
 {
 	struct stat statbuf;
 	const char *dest;
@@ -35,12 +37,12 @@ static int multi_link(const char *argv0, int count, const char *files[])
 	destfd = open(dest, O_RDONLY);
 	if (destfd < 0) {
 		fprintf(stderr, "%s: %s: %s\n",
-			argv0, dest, strerror(errno));
+			opt.argv0, dest, strerror(errno));
 		return 1;
 	}
 	if (fstat(destfd, &statbuf) || !S_ISDIR(statbuf.st_mode)) {
 		fprintf(stderr, "%s: %s: not a directory\n",
-			argv0, dest);
+			opt.argv0, dest);
 		return 1;
 	}
 	if (opt.symbolic) {
@@ -50,13 +52,13 @@ static int multi_link(const char *argv0, int count, const char *files[])
 			copy = strdup(files[i]);
 			if (!copy) {
 				fprintf(stderr, "%s: %s\n",
-					argv0, strerror(errno));
+					opt.argv0, strerror(errno));
 				return 1;
 			}
 			destfn = basename(copy);
 			if (symlinkat(files[i], destfd, destfn)) {
 				fprintf(stderr, "%s: %s: %s\n",
-					argv0, files[i], strerror(errno));
+					opt.argv0, files[i], strerror(errno));
 				free(copy);
 				return 1;
 			}
@@ -69,13 +71,13 @@ static int multi_link(const char *argv0, int count, const char *files[])
 			copy = strdup(files[i]);
 			if (!copy) {
 				fprintf(stderr, "%s: %s\n",
-					argv0, strerror(errno));
+					opt.argv0, strerror(errno));
 				return 1;
 			}
 			destfn = basename(copy);
 			if (linkat(AT_FDCWD, files[i], destfd, destfn, 0)) {
 				fprintf(stderr, "%s: %s: %s\n",
-					argv0, files[i], strerror(errno));
+					opt.argv0, files[i], strerror(errno));
 				free(copy);
 				return 1;
 			}
@@ -90,6 +92,7 @@ int main(int argc, const char *argv[])
 {
 	int i;
 
+	opt.argv0 = argv[0];
 	for (i = 1; i < argc; i++) {
 		if (argv[i][0] != '-') {
 			break;
@@ -104,12 +107,10 @@ int main(int argc, const char *argv[])
 
 	switch (argc - i) {
 	case 0:
-		fprintf(stderr, "%s: missing operand\n",
-			argv[0]);
+		fprintf(stderr, "%s: missing operand\n", argv[0]);
 		return 1;
 	case 1:
-		fprintf(stderr, "%s: missing destination\n",
-			argv[0]);
+		fprintf(stderr, "%s: missing destination\n", argv[0]);
 		return 1;
 	case 2:
 		if (single_link(argv[i], argv[i + 1])) {
@@ -119,7 +120,7 @@ int main(int argc, const char *argv[])
 		}
 		break;
 	default:
-		if (multi_link(argv[0], argc - i, argv + i)) {
+		if (multi_link(argc - i, argv + i)) {
 			return 1;
 		}
 	}

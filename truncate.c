@@ -11,6 +11,7 @@
 #include <string.h>
 
 static struct {
+	const char *argv0;
 	char *size;
 	int flags;
 } opt;
@@ -55,7 +56,7 @@ static off_t parse_unit(char unit, off_t kilo)
 	}
 }
 
-static off_t parse_size(const char *argv0)
+static off_t parse_size(void)
 {
 	size_t len;
 	off_t value;
@@ -69,12 +70,12 @@ static off_t parse_size(const char *argv0)
 	switch (len) {
 	case 0:
 		fprintf(stderr, "%s: invalid size: %s\n",
-			argv0, opt.size);
+			opt.argv0, opt.size);
 		exit(1);
 	case 1:
 		if (!isdigit(opt.size[0])) {
 			fprintf(stderr, "%s: invalid size: %s\n",
-				argv0, opt.size);
+				opt.argv0, opt.size);
 			exit(1);
 		}
 		return opt.size[0] - '0';
@@ -87,7 +88,7 @@ static off_t parse_size(const char *argv0)
 		value = parse_unit(unit, 1000);
 		if (!value) {
 			fprintf(stderr, "%s: invalid number: %s\n",
-				argv0, opt.size);
+				opt.argv0, opt.size);
 			exit(1);
 		}
 		opt.size[len - 2] = '\0';
@@ -97,7 +98,7 @@ static off_t parse_size(const char *argv0)
 	value *= strtol(opt.size, &ptr, 10);
 	if (*ptr) {
 		fprintf(stderr, "%s: invalid number: %s\n",
-			argv0, opt.size);
+			opt.argv0, opt.size);
 		exit(1);
 	}
 	return value;
@@ -109,6 +110,7 @@ int main(int argc, char *argv[])
 	off_t length;
 	int i;
 
+	opt.argv0 = argv[0];
 	opt.flags = O_CREAT;
 	for (i = 1; i < argc; i++) {
 		if (argv[i][0] != '-') {
@@ -127,7 +129,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "%s: missing operands\n", argv[0]);
 		return 1;
 	}
-	length = parse_size(argv[0]);
+	length = parse_size();
 
 	for (; i < argc; i++) {
 		int fd;

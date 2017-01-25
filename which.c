@@ -7,6 +7,8 @@
 #include <string.h>
 
 static struct {
+	const char *argv0;
+
 	unsigned all : 1;
 } opt;
 
@@ -21,7 +23,7 @@ static struct {
 #define IS_EXECUTABLE(x)				\
 	(((x) & S_IXUSR) | ((x) & S_IXGRP) | ((x) & S_IXOTH))
 
-static void split_paths(const char *argv0, size_t extra)
+static void split_paths(size_t extra)
 {
 	const char *path_env, *ptr;
 	struct path *ent;
@@ -29,7 +31,7 @@ static void split_paths(const char *argv0, size_t extra)
 
 	path_env = getenv("PATH");
 	if (!path_env || !path_env[0]) {
-		fprintf(stderr, "%s: no PATH variable found\n", argv0);
+		fprintf(stderr, "%s: no PATH variable found\n", opt.argv0);
 		exit(-1);
 	}
 
@@ -43,7 +45,7 @@ static void split_paths(const char *argv0, size_t extra)
 	paths.array = malloc(sizeof(struct path) * paths.len);
 	if (!paths.array) {
 		fprintf(stderr, "%s: unable to allocate: %s\n",
-			argv0, strerror(errno));
+			opt.argv0, strerror(errno));
 		exit(-1);
 	}
 
@@ -56,7 +58,7 @@ static void split_paths(const char *argv0, size_t extra)
 			ent->str = malloc(ent->len + extra);
 			if (!ent->str) {
 				fprintf(stderr, "%s: unable to allocate: %s\n",
-					argv0, strerror(errno));
+					opt.argv0, strerror(errno));
 				exit(-1);
 			}
 			memcpy(ent->str, ptr, ent->len);
@@ -71,7 +73,7 @@ static void split_paths(const char *argv0, size_t extra)
 	ent->str = malloc(ent->len + extra);
 	if (!ent->str) {
 		fprintf(stderr, "%s: unable to allocate: %s\n",
-			argv0, strerror(errno));
+			opt.argv0, strerror(errno));
 		exit(-1);
 	}
 	memcpy(ent->str, ptr, ent->len);
@@ -88,7 +90,7 @@ static void setup(int i, int argc, const char *argv[])
 			max = len;
 		}
 	}
-	split_paths(argv[0], max + 2);
+	split_paths(max + 2);
 }
 
 static void which(const char *program)
@@ -115,7 +117,6 @@ static void which(const char *program)
 			found = 1;
 		}
 	}
-
 	if (!found) {
 		printf("%s not found\n", program);
 	}
@@ -126,6 +127,7 @@ int main(int argc, const char *argv[])
 {
 	int i;
 
+	opt.argv0 = argv[0];
 	for (i = 1; i < argc; i++) {
 		if (argv[i][0] != '-') {
 			break;

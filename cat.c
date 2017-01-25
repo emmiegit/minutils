@@ -1,10 +1,13 @@
-#include <errno.h>
 #include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
 #include <unistd.h>
 
-static int cat(const char *argv0, int fd)
+#include <errno.h>
+#include <stdio.h>
+#include <string.h>
+
+static const char *argv0;
+
+static int cat(int fd)
 {
 	char buf[4096];
 	ssize_t n;
@@ -24,8 +27,9 @@ int main(int argc, char *argv[])
 {
 	int i;
 
+	argv0 = argv[0];
 	if (argc == 1) {
-		return cat(argv[0], STDIN_FILENO);
+		return cat(STDIN_FILENO);
 	} else for (i = 1; i < argc; i++) {
 		int fd;
 
@@ -35,7 +39,7 @@ int main(int argc, char *argv[])
 				argv[0], argv[i], strerror(errno));
 			return 1;
 		}
-		if (cat(argv[0], fd)) {
+		if (cat(fd)) {
 			return 1;
 		}
 		if (close(fd)) {

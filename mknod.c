@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <string.h>
 
+const char *argv0;
+
 static mode_t get_mode(const char *str)
 {
 	mode_t mode;
@@ -30,7 +32,7 @@ static mode_t get_mode(const char *str)
 	return mode;
 }
 
-static unsigned int parse_int(const char *argv0, const char *str)
+static unsigned int parse_int(const char *str)
 {
 	char *ptr;
 	long value;
@@ -64,6 +66,7 @@ int main(int argc, const char *argv[])
 	dev_t dev;
 	int i;
 
+	argv0 = argv[0];
 	mode = 0666;
 	for (i = 1; i < argc; i++) {
 		if (argv[i][0] != '-') {
@@ -92,8 +95,8 @@ int main(int argc, const char *argv[])
 			argv[0]);
 		return 1;
 	case 4:
-		major = parse_int(argv[0], argv[i + 2]);
-		minor = parse_int(argv[0], argv[i + 3]);
+		major = parse_int(argv[i + 2]);
+		minor = parse_int(argv[i + 3]);
 		dev = makedev(major, minor);
 		/* FALLTHROUGH */
 	case 2:

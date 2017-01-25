@@ -7,7 +7,9 @@
 #include <string.h>
 #include <time.h>
 
-static int touch(const char *argv0, const char *path)
+static const char *argv0;
+
+static int touch(const char *path)
 {
 	struct utimbuf new_times;
 	time_t new_time;
@@ -40,12 +42,13 @@ int main(int argc, char *argv[])
 {
 	int i;
 
+	argv0 = argv[0];
 	if (argc == 1) {
 		fprintf(stderr, "%s: missing operand\n", argv[0]);
 		return 1;
 	}
 	for (i = 1; i < argc; i++) {
-		if (touch(argv[0], argv[i])) {
+		if (touch(argv[i])) {
 			return 1;
 		}
 	}

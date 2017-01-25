@@ -7,10 +7,12 @@
 #include <string.h>
 
 static struct {
+	const char *argv0;
+
 	unsigned all : 1;
 } opt;
 
-static int list(const char *argv0, const char *path, int label)
+static int list(const char *path, int label)
 {
 	static int notfirst;
 	struct stat statbuf;
@@ -19,7 +21,7 @@ static int list(const char *argv0, const char *path, int label)
 
 	if (stat(path, &statbuf)) {
 		fprintf(stderr, "%s: unable to stat %s: %s\n",
-			argv0, path, strerror(errno));
+			opt.argv0, path, strerror(errno));
 		return 1;
 	}
 	if (!S_ISDIR(statbuf.st_mode)) {
@@ -37,7 +39,7 @@ static int list(const char *argv0, const char *path, int label)
 	dh = opendir(path);
 	if (!dh) {
 		fprintf(stderr, "%s: %s: %s\n",
-			argv0, path, strerror(errno));
+			opt.argv0, path, strerror(errno));
 		return 1;
 	}
 	while ((ent = readdir(dh))) {
@@ -48,7 +50,7 @@ static int list(const char *argv0, const char *path, int label)
 	}
 	if (closedir(dh)) {
 		fprintf(stderr, "%s: %s: %s\n",
-			argv0, path, strerror(errno));
+			opt.argv0, path, strerror(errno));
 		return 1;
 	}
 	return 0;
@@ -59,6 +61,7 @@ int main(int argc, const char *argv[])
 {
 	int i;
 
+	opt.argv0 = argv[0];
 	for (i = 1; i < argc; i++) {
 		if (argv[i][0] != '-') {
 			break;
@@ -72,15 +75,15 @@ int main(int argc, const char *argv[])
 	}
 
 	if (i == argc) {
-		if (list(argv[0], ".", 0)) {
+		if (list(".", 0)) {
 			return 1;
 		}
 	} else if (i == argc - 1) {
-		if (list(argv[0], argv[i], 0)) {
+		if (list(argv[i], 0)) {
 			return 1;
 		}
 	} else for (; i < argc; i++) {
-		if (list(argv[0], argv[i], 1)) {
+		if (list(argv[i], 1)) {
 			return 1;
 		}
 	}
