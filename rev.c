@@ -69,7 +69,7 @@ static void append_to_char_list(char ch)
 	line.array[line.length++] = ch;
 }
 
-/* Usage: ./tac [FILE...] */
+/* Usage: ./rev [FILE...] */
 int main(int argc, char *argv[])
 {
 	int i;
@@ -131,9 +131,23 @@ int main(int argc, char *argv[])
 	}
 
 	free(line.array);
+#ifdef REVERSE_LINES
 	for (i = lines.length - 1; i >= 0; i--) {
 		printf("%s\n", lines.array[i]);
 	}
+#else
+	for (i = 0; i < (int)lines.length; i++) {
+		int j;
+
+		j = strlen(lines.array[i]) - 1;
+		for (; j >= 0; j--) {
+			putchar(lines.array[i][j]);
+		}
+		if (i < (int)lines.length - 1) {
+			putchar('\n');
+		}
+	}
+#endif
 	return 0;
 }
 
