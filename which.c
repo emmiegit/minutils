@@ -18,6 +18,9 @@ static struct {
 	size_t len;
 } paths;
 
+#define IS_EXECUTABLE(x)				\
+	(((x) & S_IXUSR) | ((x) & S_IXGRP) | ((x) & S_IXOTH))
+
 static void split_paths(const char *argv0, size_t extra)
 {
 	const char *path_env, *ptr;
@@ -61,7 +64,6 @@ static void split_paths(const char *argv0, size_t extra)
 
 
 			ent->str[ent->len]='\0';
-			printf("-%s- [%lu]\n", ent->str, ent->len);
 		}
 	}
 	ent = &paths.array[j];
@@ -91,6 +93,32 @@ static void setup(int i, int argc, const char *argv[])
 
 static void which(const char *program)
 {
+	struct stat stbuf;
+	struct path *ent;
+	size_t i;
+	int found;
+
+	found = 0;
+	for (i = 0; i < paths.len; i++) {
+		ent = &paths.array[i];
+		ent->str[ent->len] = '/';
+		strcpy(ent->str + ent->len + 1, program);
+
+		if (stat(ent->str, &stbuf)) {
+			continue;
+		}
+		if (IS_EXECUTABLE(stbuf.st_mode)) {
+			puts(ent->str);
+			if (!opt.all) {
+				return;
+			}
+			found = 1;
+		}
+	}
+
+	if (!found) {
+		printf("%s not found\n", program);
+	}
 }
 
 /* Usage: ./which [-a] program... */
