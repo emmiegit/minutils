@@ -21,8 +21,16 @@ bin:
 	@mkdir -p bin
 
 bin/%: %.c
-	@echo '[CC] $(@F)'
-	@$(CC) $(FLAGS) $(CFLAGS) -o $@ $<
+	@if [[ ! -L $< ]]; then \
+		echo '[CC] $(@F)'; \
+		$(CC) $(FLAGS) $(CFLAGS) -o $@ $<; \
+		strip $@; \
+	else \
+		echo '[LN] $(@F)'; \
+		source="$$(readlink '$<' | cut -d. -f1)"; \
+		cd bin; \
+		ln -sf $${source} $(@F); \
+	fi
 
 bin/%: %.s
 	@echo '[AS] $(@F)'
