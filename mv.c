@@ -46,7 +46,7 @@ static int copy_file(const char *source, int destfd, const char *destfn)
 	return 0;
 }
 
-/* Usage: ./mv FILES... DEST */
+/* Usage: mv FILES... DEST */
 int main(int argc, char *argv[])
 {
 	if (argc == 1) {

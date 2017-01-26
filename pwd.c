@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
-/* Usage: ./pwd */
+/* Usage: pwd */
 int main(int argc, const char *argv[])
 {
 	char cwd[PATH_MAX];

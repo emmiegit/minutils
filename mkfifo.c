@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
-/* Usage: ./mkfifo [PATH...] */
+/* Usage: mkfifo [PATH...] */
 int main(int argc, const char *argv[])
 {
 	int i;

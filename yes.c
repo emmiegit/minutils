@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-/* ./yes [TEXT...] */
+/* yes [TEXT...] */
 int main(int argc, char *argv[])
 {
 	if (argc == 1) {

@@ -15,7 +15,7 @@ static void print_env(const char *environ[])
 	}
 }
 
-/* Usage: ./env [VARIABLE=value] program [ARGUMENTS] */
+/* Usage: env [VARIABLE=value] program [ARGUMENTS] */
 int main(int argc, char *argv[], const char *environ[])
 {
 	int i;

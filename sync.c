@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
-/* Usage ./sync [PATH...] */
+/* Usage sync [PATH...] */
 int main(int argc, const char *argv[])
 {
 	int i;

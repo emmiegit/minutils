@@ -50,7 +50,7 @@ static unsigned int parse_int(const char *str)
 	return value;
 }
 
-/* Usage: ./mknod [-m=MODE] NAME TYPE [MAJOR MINOR] */
+/* Usage: mknod [-m=MODE] NAME TYPE [MAJOR MINOR] */
 int main(int argc, const char *argv[])
 {
 	const char *path, *typestr;

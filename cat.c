@@ -22,7 +22,7 @@ static int cat(int fd)
 	return 0;
 }
 
-/* Usage: ./cat [FILE...] */
+/* Usage: cat [FILE...] */
 int main(int argc, const char *argv[])
 {
 	int i;

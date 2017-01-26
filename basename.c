@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-/* Usage: ./basename PATH */
+/* Usage: basename PATH */
 int main(int argc, char *argv[])
 {
 	if (argc == 1) {

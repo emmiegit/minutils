@@ -50,7 +50,7 @@ static int do_mkdir(const char *path)
 	return 0;
 }
 
-/* Usage ./mkdir [-p] DIRECTORY... */
+/* Usage mkdir [-p] DIRECTORY... */
 int main(int argc, const char *argv[])
 {
 	int (*mkdir_func)(const char *);

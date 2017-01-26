@@ -25,7 +25,7 @@ static int do_realpath(const char *path)
 	return 0;
 }
 
-/* Usage: ./realpath [FILE...] */
+/* Usage: realpath [FILE...] */
 int main(int argc, const char *argv[])
 {
 	int i, ret;

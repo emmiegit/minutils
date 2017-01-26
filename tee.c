@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Usage: ./tee [FILE...] */
+/* Usage: tee [FILE...] */
 int main(int argc, char *argv[])
 {
 	char buf[4096];

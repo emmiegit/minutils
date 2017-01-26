@@ -200,7 +200,7 @@ static int do_stat(const char *path, int (*stat_func)(const char *, struct stat 
 	return 0;
 }
 
-/* ./stat [-L] [-c format] file... */
+/* stat [-L] [-c format] file... */
 int main(int argc, char *argv[])
 {
 	int (*stat_func)(const char *, struct stat *);

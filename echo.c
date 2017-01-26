@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-/* Usage: ./echo [TEXT...] */
+/* Usage: echo [TEXT...] */
 int main(int argc, char *argv[])
 {
 	int i;

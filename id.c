@@ -125,6 +125,7 @@ static void default_ids(void)
 	putchar('\n');
 }
 
+/* Usage: id [-a] [-g] [-G] [-n] [-r] [-u] */
 int main(int argc, char *argv[])
 {
 	int ch;

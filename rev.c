@@ -69,7 +69,7 @@ static void append_to_char_list(char ch)
 	line.array[line.length++] = ch;
 }
 
-/* Usage: ./rev [FILE...] */
+/* Usage: rev [FILE...] */
 int main(int argc, char *argv[])
 {
 	int i;

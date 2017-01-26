@@ -233,7 +233,7 @@ static unsigned int parse_int(const char *str)
 	return value;
 }
 
-/* Usage: ./shred [-u] [-z] [-n=ITERATIONS] FILE... */
+/* Usage: shred [-u] [-z] [-n=ITERATIONS] FILE... */
 int main(int argc, char *argv[])
 {
 	int i;

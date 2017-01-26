@@ -86,7 +86,7 @@ static int multi_link(int count, const char *files[])
 	return 0;
 }
 
-/* Usage: ./ln [-s] SOURCE... DEST */
+/* Usage: ln [-s] SOURCE... DEST */
 int main(int argc, const char *argv[])
 {
 	int i;

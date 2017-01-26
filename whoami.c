@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Usage: ./whoami */
+/* Usage: whoami */
 int main(int argc, const char *argv[])
 {
 	struct passwd *pw;

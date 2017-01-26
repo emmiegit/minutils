@@ -28,7 +28,7 @@ static double parse_float(const char *str)
 	return val;
 }
 
-/* Usage: ./seq [-s=SEPARATOR] [FIRST] [INCREMENT] LAST */
+/* Usage: seq [-s=SEPARATOR] [FIRST] [INCREMENT] LAST */
 int main(int argc, const char *argv[])
 {
 	double n;

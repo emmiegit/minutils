@@ -101,7 +101,7 @@ static void do_chown(int count, char **files)
 	exit(ret);
 }
 
-/* Usage ./chown [-h] [owner][:[group]] FILE... */
+/* Usage chown [-h] [owner][:[group]] FILE... */
 int main(int argc, char *argv[])
 {
 	int i;

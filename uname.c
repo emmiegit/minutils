@@ -12,7 +12,7 @@ static struct {
 	unsigned machine : 1;
 } opt;
 
-/* Usage: ./uname [-a] [-s] [-n] [-r] [-v] [-m] */
+/* Usage: uname [-a] [-s] [-n] [-r] [-v] [-m] */
 int main(int argc, const char *argv[])
 {
 	struct utsname uts;
