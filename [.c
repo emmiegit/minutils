@@ -5,6 +5,7 @@
 #include <libgen.h>
 #include <unistd.h>
 
+#include <ctype.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -23,17 +24,46 @@ struct tokenlist {
 			TOKEN_NOT,
 			TOKEN_AND,
 			TOKEN_OR,
-			TOKEN_STRCMP,
-			TOKEN_INTCMP,
-			TOKEN_FILECMP,
-			TOKEN_FILESTAT,
+			TOKEN_NULL,
+			TOKEN_NONNULL,
+			TOKEN_STREQ,
+			TOKEN_STRNEQ,
+			TOKEN_EQ,
+			TOKEN_NE,
+			TOKEN_GE,
+			TOKEN_GT,
+			TOKEN_LE,
+			TOKEN_LT,
+			TOKEN_FILE_EF,
+			TOKEN_FILE_NT,
+			TOKEN_FILE_OT,
+			TOKEN_BLOCK,
+			TOKEN_CHAR,
+			TOKEN_DIR,
+			TOKEN_EXISTS,
+			TOKEN_REG,
+			TOKEN_SGID,
+			TOKEN_GROUP,
+			TOKEN_SYMLNK,
+			TOKEN_USER,
+			TOKEN_FIFO,
+			TOKEN_READ,
+			TOKEN_SIZE,
+			TOKEN_SOCK,
+			TOKEN_TTY,
+			TOKEN_SUID,
+			TOKEN_WRITE,
+			TOKEN_EXEC,
+			TOKEN_INT,
 			TOKEN_VALUE
 		} t;
-		const char *str;
+		union {
+			const char *str;
+			long num;
+		} v;
 	} *array;
 
 	size_t len;
-	size_t capacity;
 };
 
 struct expression {
@@ -134,10 +164,10 @@ static bool is_bracket(void)
 	bool ret;
 
 	str2 = strdup(argv0);
-	if (str2) {
+	if (!str2) {
 		fprintf(stderr, "%s: unable to allocate: %s\n",
 			argv0, strerror(errno));
-		exit(-1);
+		exit(2);
 	}
 	base = basename(str2);
 	ret = !strcmp(base, "[");
@@ -145,14 +175,178 @@ static bool is_bracket(void)
 	return ret;
 }
 
+static bool isnum(const char *str)
+{
+	if (str[0] == '-') {
+		str++;
+	}
+	while (*str) {
+		if (!isdigit(*str)) {
+			return false;
+		}
+		str++;
+	}
+	return true;
+}
+
+static void init_tokens(struct tokenlist *tokens, int argc)
+{
+	tokens->len = argc - 1;
+	tokens->array = malloc(sizeof(struct token) * tokens->len);
+	if (!tokens->array) {
+		fprintf(stderr, "%s: unable to allocate: %s\n",
+			argv0, strerror(errno));
+		exit(2);
+	}
+}
+
 static void parse_tokens(struct tokenlist *tokens, int argc, const char *argv[])
 {
-	/* TODO */
+	struct token *token;
+	int i;
+
+	for (i = 1; i < argc; i++) {
+		token = &tokens->array[i - 1];
+
+		if (!strcmp(argv[i], "(")) {
+			token->t = TOKEN_LPAREN;
+		} else if (!strcmp(argv[i], ")")) {
+			token->t = TOKEN_RPAREN;
+		} else if (!strcmp(argv[i], "!")) {
+			token->t = TOKEN_NOT;
+		} else if (!strcmp(argv[i], "=") || !strcmp(argv[i], "==")) {
+			token->t = TOKEN_STREQ;
+		} else if (!strcmp(argv[i], "!=")) {
+			token->t = TOKEN_STRNEQ;
+		} else if (!strcmp(argv[i], "-eq")) {
+			token->t = TOKEN_EQ;
+		} else if (!strcmp(argv[i], "-ne")) {
+			token->t = TOKEN_NE;
+		} else if (!strcmp(argv[i], "-ge")) {
+			token->t = TOKEN_GE;
+		} else if (!strcmp(argv[i], "-gt")) {
+			token->t = TOKEN_GT;
+		} else if (!strcmp(argv[i], "-le")) {
+			token->t = TOKEN_LE;
+		} else if (!strcmp(argv[i], "-lt")) {
+			token->t = TOKEN_LT;
+		} else if (!strcmp(argv[i], "-ef")) {
+			token->t = TOKEN_FILE_EF;
+		} else if (!strcmp(argv[i], "-nt")) {
+			token->t = TOKEN_FILE_NT;
+		} else if (!strcmp(argv[i], "-ot")) {
+			token->t = TOKEN_FILE_OT;
+		} else if (isnum(argv[i])) {
+			token->t = TOKEN_INT;
+			token->v.num = atol(argv[i]);
+		} else if (argv[i][0] != '-') {
+			token->t = TOKEN_VALUE;
+			token->v.str = argv[i];
+		} else {
+			if (strlen(argv[i]) != 2) {
+				fprintf(stderr, "%s: unknown condition: %s\n",
+					argv0, argv[i]);
+				exit(2);
+			}
+
+			switch (argv[i][1]) {
+			case 'a':
+				token->t = TOKEN_AND;
+				break;
+			case 'o':
+				token->t = TOKEN_OR;
+				break;
+			case 'n':
+				token->t = TOKEN_NONNULL;
+				break;
+			case 'z':
+				token->t = TOKEN_NULL;
+				break;
+			case 'b':
+				token->t = TOKEN_BLOCK;
+				break;
+			case 'c':
+				token->t = TOKEN_CHAR;
+				break;
+			case 'd':
+				token->t = TOKEN_DIR;
+				break;
+			case 'e':
+				token->t = TOKEN_EXISTS;
+				break;
+			case 'f':
+				token->t = TOKEN_REG;
+				break;
+			case 'g':
+				token->t = TOKEN_SGID;
+				break;
+			case 'G':
+				token->t = TOKEN_GROUP;
+				break;
+			case 'h':
+			case 'L':
+				token->t = TOKEN_SYMLNK;
+				break;
+			case 'O':
+				token->t = TOKEN_USER;
+				break;
+			case 'p':
+				token->t = TOKEN_FIFO;
+				break;
+			case 'r':
+				token->t = TOKEN_READ;
+				break;
+			case 's':
+				token->t = TOKEN_SIZE;
+				break;
+			case 'S':
+				token->t = TOKEN_SOCK;
+				break;
+			case 't':
+				token->t = TOKEN_TTY;
+				break;
+			case 'u':
+				token->t = TOKEN_SUID;
+				break;
+			case 'w':
+				token->t = TOKEN_WRITE;
+				break;
+			case 'x':
+				token->t = TOKEN_EXEC;
+				break;
+			default:
+				fprintf(stderr, "%s: unknown condition: %s\n",
+					argv0, argv[i]);
+				exit(2);
+			}
+		}
+	}
 }
 
 static void build_tree(struct expression *expr, const struct tokenlist *tokens)
 {
-	/* TODO */
+	size_t i;
+
+	for (i = 0; i < tokens->len; i++) {
+		const struct token *token;
+
+		token = &tokens->array[i];
+		if (token->t == TOKEN_LPAREN) {
+			struct tokenlist subtokens;
+			size_t j;
+
+			for (j = 1; j < tokens->len; j++) {
+				if (tokens->array[j].t == TOKEN_RPAREN) {
+					break;
+				}
+			}
+			if (j == tokens->len) {
+				fprintf(stderr, "%s: missing ')'\n", argv0);
+				exit(2);
+			}
+			subtokens.len = j - i;
+		}
+	}
 }
 
 static bool eval_bool(const struct e_bool *expr)
@@ -344,6 +538,7 @@ int main(int argc, const char *argv[])
 			return 2;
 		}
 	}
+	init_tokens(&tokens, argc);
 	parse_tokens(&tokens, argc, argv);
 	build_tree(&tree, &tokens);
 	return 0;
