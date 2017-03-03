@@ -5,541 +5,450 @@
 #include <libgen.h>
 #include <unistd.h>
 
-#include <ctype.h>
-#include <errno.h>
-#include <stdbool.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-#define STRING_EMPTY(x)		((x)[0] == '\0')
+struct test_action {
+	enum test_type {
+		/* File checks */
+		TEST_BLOCK,
+		TEST_CHAR,
+		TEST_DIR,
+		TEST_EXISTS,
+		TEST_FILE,
+		TEST_SGID,
+		TEST_GROUP,
+		TEST_SYMLINK,
+		TEST_STICKY,
+		TEST_OWNER,
+		TEST_FIFO,
+		TEST_READ,
+		TEST_SIZE,
+		TEST_SOCKET,
+		TEST_TTY,
+		TEST_SUID,
+		TEST_WRITE,
+		TEST_EXE,
 
-static const char *argv0;
+		/* File comparisons */
+		TEST_SAMEFILE,
+		TEST_NEWER,
+		TEST_OLDER,
 
-struct tokenlist {
-	struct token {
-		enum {
-			TOKEN_LPAREN,
-			TOKEN_RPAREN,
-			TOKEN_NOT,
-			TOKEN_AND,
-			TOKEN_OR,
-			TOKEN_NULL,
-			TOKEN_NONNULL,
-			TOKEN_STREQ,
-			TOKEN_STRNEQ,
-			TOKEN_EQ,
-			TOKEN_NE,
-			TOKEN_GE,
-			TOKEN_GT,
-			TOKEN_LE,
-			TOKEN_LT,
-			TOKEN_FILE_EF,
-			TOKEN_FILE_NT,
-			TOKEN_FILE_OT,
-			TOKEN_BLOCK,
-			TOKEN_CHAR,
-			TOKEN_DIR,
-			TOKEN_EXISTS,
-			TOKEN_REG,
-			TOKEN_SGID,
-			TOKEN_GROUP,
-			TOKEN_SYMLNK,
-			TOKEN_USER,
-			TOKEN_FIFO,
-			TOKEN_READ,
-			TOKEN_SIZE,
-			TOKEN_SOCK,
-			TOKEN_TTY,
-			TOKEN_SUID,
-			TOKEN_WRITE,
-			TOKEN_EXEC,
-			TOKEN_INT,
-			TOKEN_VALUE
-		} t;
-		union {
-			const char *str;
-			long num;
-		} v;
-	} *array;
+		/* String checks */
+		TEST_STR_ZERO,
+		TEST_STR_NONZERO,
 
-	size_t len;
+		/* String comparisons */
+		TEST_STR_EQ,
+		TEST_STR_NE,
+
+		/* Integer comparisons */
+		TEST_INT_EQ,
+		TEST_INT_NE,
+		TEST_INT_GT,
+		TEST_INT_GE,
+		TEST_INT_LT,
+		TEST_INT_LE,
+
+		/* Invalid */
+		TEST_INVALID
+	} type;
+	const char *first;
+	const char *second;
 };
 
-struct expression {
-	enum {
-		EXPR_NOT,
-		EXPR_BOOL,
-		EXPR_STR_CMP,
-		EXPR_STR_NULL,
-		EXPR_INT_CMP,
-		EXPR_FILE_CMP,
-		EXPR_FILE_STAT
-	} t;
-
-	union {
-		struct e_not {
-			struct expression *a;
-		} e_not;
-
-		struct e_bool {
-			struct expression *a, *b;
-			enum {
-				BOOL_AND,
-				BOOL_OR
-			} m;
-		} e_bool;
-
-		struct e_strcmp {
-			const char *a, *b;
-			enum {
-				STR_EQ,
-				STR_NE
-			} m;
-		} e_strcmp;
-
-		struct e_strnul {
-			const char *a;
-			enum {
-				STR_NUL,
-				STR_VAL
-			} m;
-		} e_strnul;
-
-		struct e_intcmp {
-			long a, b;
-			enum {
-				INT_EQ,
-				INT_NE,
-				INT_GE,
-				INT_GT,
-				INT_LE,
-				INT_LT
-			} m;
-		} e_intcmp;
-
-		struct e_filecmp {
-			const char *a, *b;
-			enum {
-				FCMP_EF,
-				FCMP_NT,
-				FCMP_OT
-			} m;
-		} e_filecmp;
-
-		struct e_filestat {
-			const char *a;
-			enum {
-				FILE_BLOCK,
-				FILE_CHAR,
-				FILE_DIR,
-				FILE_EXIST,
-				FILE_REG,
-				FILE_SGID,
-				FILE_GROUP,
-				FILE_STCKY,
-				FILE_SYMLNK,
-				FILE_USER,
-				FILE_FIFO,
-				FILE_READ,
-				FILE_SIZE,
-				FILE_SOCK,
-				FILE_TTY,
-				FILE_SUID,
-				FILE_WRITE,
-				FILE_EXEC
-			} m;
-		} e_filestat;
-	} u;
-};
-
-static void parse_tokens(struct tokenlist *tokens, int argc, const char *argv[]);
-static void build_tree(struct expression *expr, const struct tokenlist *tokens);
-static bool eval(const struct expression *expr);
-
-static bool is_bracket(void)
+/*
+ * Get the appropriate action from the test flag.
+ * Doesn't print any errors.
+ */
+static enum test_type get_test_type(const char *flag)
 {
-	const char *base;
-	char *str2;
-	bool ret;
-
-	str2 = strdup(argv0);
-	if (!str2) {
-		fprintf(stderr, "%s: unable to allocate: %s\n",
-			argv0, strerror(errno));
-		exit(2);
+	/*
+	 * I used gotos because switchs within switches
+	 * look hidiously unreadable.
+	 *
+	 * I've placed traps to catch leaks between branches.
+	 */
+	switch (strlen(flag)) {
+	case 2:
+		goto flags1;
+	case 3:
+		goto flags2;
+	case 1:
+		if (flag[0] == '=')
+			return TEST_STR_EQ;
+		/* FALLTHROUGH */
+	default:
+		return TEST_INVALID;
 	}
-	base = basename(str2);
-	ret = !strcmp(base, "[");
-	free(str2);
-	return ret;
+	assert(0);
+
+flags1:
+	if (flag[0] != '-') {
+		if      (!strcmp(flag, "=="))
+			return TEST_STR_EQ;
+		else if (!strcmp(flag, "!="))
+			return TEST_STR_NE;
+		else
+			return TEST_INVALID;
+	}
+
+	switch (flag[1]) {
+	/* File types */
+	case 'b':
+		return TEST_BLOCK;
+	case 'c':
+		return TEST_CHAR;
+	case 'd':
+		return TEST_DIR;
+	case 'e':
+		return TEST_EXISTS;
+	case 'f':
+		return TEST_FILE;
+	case 'g':
+		return TEST_SGID;
+	case 'G':
+		return TEST_GROUP;
+	case 'h':
+	case 'L':
+		return TEST_SYMLINK;
+	case 'k':
+		return TEST_STICKY;
+	case 'O':
+		return TEST_OWNER;
+	case 'p':
+		return TEST_FIFO;
+	case 'r':
+		return TEST_READ;
+	case 's':
+		return TEST_SIZE;
+	case 'S':
+		return TEST_SOCKET;
+	case 't':
+		return TEST_TTY;
+	case 'u':
+		return TEST_SUID;
+	case 'w':
+		return TEST_WRITE;
+	case 'x':
+		return TEST_EXE;
+
+	/* Strings */
+	case 'n':
+		return TEST_STR_NONZERO;
+	case 'z':
+		return TEST_STR_ZERO;
+	default:
+		return TEST_INVALID;
+	}
+	assert(0);
+
+flags2:
+	if      (!strcmp(flag, "-eq")) return TEST_INT_EQ;
+	else if (!strcmp(flag, "-ne")) return TEST_INT_NE;
+	else if (!strcmp(flag, "-gt")) return TEST_INT_GT;
+	else if (!strcmp(flag, "-ge")) return TEST_INT_GE;
+	else if (!strcmp(flag, "-lt")) return TEST_INT_LT;
+	else if (!strcmp(flag, "-le")) return TEST_INT_LE;
+	else if (!strcmp(flag, "-ef")) return TEST_SAMEFILE;
+	else if (!strcmp(flag, "-nt")) return TEST_NEWER;
+	else if (!strcmp(flag, "-ot")) return TEST_OLDER;
+	else                           return TEST_INVALID;
 }
 
-static bool isnum(const char *str)
+/* File operations */
+static int test_stat(enum test_type type, const char *path)
 {
-	if (str[0] == '-') {
-		str++;
+	struct stat stbuf;
+	int (*func)(const char *, struct stat *);
+
+	func = (type == TEST_SYMLINK) ? lstat : stat;
+
+	if (func(path, &stbuf))
+		return 0;
+
+	switch (type) {
+	/* Existence */
+	case TEST_EXISTS:
+		return 1;
+
+	/* File type */
+	case TEST_BLOCK:
+		return S_ISBLK(stbuf.st_mode);
+	case TEST_CHAR:
+		return S_ISCHR(stbuf.st_mode);
+	case TEST_DIR:
+		return S_ISDIR(stbuf.st_mode);
+	case TEST_FILE:
+		return S_ISREG(stbuf.st_mode);
+	case TEST_FIFO:
+		return S_ISFIFO(stbuf.st_mode);
+	case TEST_SOCKET:
+		return S_ISSOCK(stbuf.st_mode);
+	case TEST_SYMLINK:
+		return S_ISLNK(stbuf.st_mode);
+
+	/* Ownership */
+	case TEST_OWNER:
+		return stbuf.st_uid == geteuid();
+	case TEST_GROUP:
+		return stbuf.st_gid == getegid();
+
+	/* File size */
+	case TEST_SIZE:
+		return stbuf.st_size > 0;
+
+	/* Special permissions */
+	case TEST_SUID:
+		return stbuf.st_mode & S_ISUID;
+	case TEST_SGID:
+		return stbuf.st_mode & S_ISGID;
+	case TEST_STICKY:
+		return stbuf.st_mode & S_ISVTX;
+
+	/* Access checks */
+	case TEST_READ:
+		return !access(path, R_OK);
+	case TEST_WRITE:
+		return !access(path, W_OK);
+	case TEST_EXE:
+		return !access(path, X_OK);
+
+	/* Error */
+	default:
+		abort();
 	}
-	while (*str) {
-		if (!isdigit(*str)) {
-			return false;
-		}
-		str++;
-	}
-	return true;
+
+	return -1;
 }
 
-static void init_tokens(struct tokenlist *tokens, int argc)
+static int test_tty(const char *fdstr)
 {
-	tokens->len = argc - 1;
-	tokens->array = malloc(sizeof(struct token) * tokens->len);
-	if (!tokens->array) {
-		fprintf(stderr, "%s: unable to allocate: %s\n",
-			argv0, strerror(errno));
-		exit(2);
-	}
+	char *ptr;
+	int fd;
+
+	fd = strtol(fdstr, &ptr, 0);
+	if (!*fdstr || *ptr)
+		return 0;
+	return isatty(fd);
 }
 
-static void parse_tokens(struct tokenlist *tokens, int argc, const char *argv[])
-{
-	struct token *token;
-	int i;
-
-	for (i = 1; i < argc; i++) {
-		token = &tokens->array[i - 1];
-
-		if (!strcmp(argv[i], "(")) {
-			token->t = TOKEN_LPAREN;
-		} else if (!strcmp(argv[i], ")")) {
-			token->t = TOKEN_RPAREN;
-		} else if (!strcmp(argv[i], "!")) {
-			token->t = TOKEN_NOT;
-		} else if (!strcmp(argv[i], "=") || !strcmp(argv[i], "==")) {
-			token->t = TOKEN_STREQ;
-		} else if (!strcmp(argv[i], "!=")) {
-			token->t = TOKEN_STRNEQ;
-		} else if (!strcmp(argv[i], "-eq")) {
-			token->t = TOKEN_EQ;
-		} else if (!strcmp(argv[i], "-ne")) {
-			token->t = TOKEN_NE;
-		} else if (!strcmp(argv[i], "-ge")) {
-			token->t = TOKEN_GE;
-		} else if (!strcmp(argv[i], "-gt")) {
-			token->t = TOKEN_GT;
-		} else if (!strcmp(argv[i], "-le")) {
-			token->t = TOKEN_LE;
-		} else if (!strcmp(argv[i], "-lt")) {
-			token->t = TOKEN_LT;
-		} else if (!strcmp(argv[i], "-ef")) {
-			token->t = TOKEN_FILE_EF;
-		} else if (!strcmp(argv[i], "-nt")) {
-			token->t = TOKEN_FILE_NT;
-		} else if (!strcmp(argv[i], "-ot")) {
-			token->t = TOKEN_FILE_OT;
-		} else if (isnum(argv[i])) {
-			token->t = TOKEN_INT;
-			token->v.num = atol(argv[i]);
-		} else if (argv[i][0] != '-') {
-			token->t = TOKEN_VALUE;
-			token->v.str = argv[i];
-		} else {
-			if (strlen(argv[i]) != 2) {
-				fprintf(stderr, "%s: unknown condition: %s\n",
-					argv0, argv[i]);
-				exit(2);
-			}
-
-			switch (argv[i][1]) {
-			case 'a':
-				token->t = TOKEN_AND;
-				break;
-			case 'o':
-				token->t = TOKEN_OR;
-				break;
-			case 'n':
-				token->t = TOKEN_NONNULL;
-				break;
-			case 'z':
-				token->t = TOKEN_NULL;
-				break;
-			case 'b':
-				token->t = TOKEN_BLOCK;
-				break;
-			case 'c':
-				token->t = TOKEN_CHAR;
-				break;
-			case 'd':
-				token->t = TOKEN_DIR;
-				break;
-			case 'e':
-				token->t = TOKEN_EXISTS;
-				break;
-			case 'f':
-				token->t = TOKEN_REG;
-				break;
-			case 'g':
-				token->t = TOKEN_SGID;
-				break;
-			case 'G':
-				token->t = TOKEN_GROUP;
-				break;
-			case 'h':
-			case 'L':
-				token->t = TOKEN_SYMLNK;
-				break;
-			case 'O':
-				token->t = TOKEN_USER;
-				break;
-			case 'p':
-				token->t = TOKEN_FIFO;
-				break;
-			case 'r':
-				token->t = TOKEN_READ;
-				break;
-			case 's':
-				token->t = TOKEN_SIZE;
-				break;
-			case 'S':
-				token->t = TOKEN_SOCK;
-				break;
-			case 't':
-				token->t = TOKEN_TTY;
-				break;
-			case 'u':
-				token->t = TOKEN_SUID;
-				break;
-			case 'w':
-				token->t = TOKEN_WRITE;
-				break;
-			case 'x':
-				token->t = TOKEN_EXEC;
-				break;
-			default:
-				fprintf(stderr, "%s: unknown condition: %s\n",
-					argv0, argv[i]);
-				exit(2);
-			}
-		}
-	}
-}
-
-static void build_tree(struct expression *expr, const struct tokenlist *tokens)
-{
-	size_t i;
-
-	for (i = 0; i < tokens->len; i++) {
-		const struct token *token;
-
-		token = &tokens->array[i];
-		if (token->t == TOKEN_LPAREN) {
-			struct tokenlist subtokens;
-			size_t j;
-
-			for (j = 1; j < tokens->len; j++) {
-				if (tokens->array[j].t == TOKEN_RPAREN) {
-					break;
-				}
-			}
-			if (j == tokens->len) {
-				fprintf(stderr, "%s: missing ')'\n", argv0);
-				exit(2);
-			}
-			subtokens.len = j - i;
-		}
-	}
-}
-
-static bool eval_bool(const struct e_bool *expr)
-{
-	/* Simulates short-circuiting */
-	switch (expr->m) {
-	case BOOL_AND:
-		if (!eval(expr->a)) {
-			return 0;
-		}
-		return eval(expr->b);
-	case BOOL_OR:
-		if (eval(expr->a)) {
-			return 1;
-		}
-		return eval(expr->b);
-	}
-}
-
-static bool eval_strcmp(const struct e_strcmp *expr)
-{
-	int ret;
-
-	ret = strcmp(expr->a, expr->b);
-	switch (expr->m) {
-	case STR_EQ:
-		return !ret;
-	case STR_NE:
-		return ret;
-	}
-}
-
-static bool eval_intcmp(const struct e_intcmp *expr)
-{
-	switch (expr->m) {
-	case INT_EQ:
-		return expr->a == expr->b;
-	case INT_NE:
-		return expr->a != expr->b;
-	case INT_GE:
-		return expr->a >= expr->b;
-	case INT_GT:
-		return expr->a > expr->b;
-	case INT_LE:
-		return expr->a <= expr->b;
-	case INT_LT:
-		return expr->a < expr->b;
-	}
-}
-
-static bool eval_filecmp(const struct e_filecmp *expr)
+static int file_cmp(const struct test_action *act)
 {
 	struct stat stbuf_a, stbuf_b;
 
-	if (stat(expr->a, &stbuf_a)) {
-		exit(1);
-	}
-	if (stat(expr->b, &stbuf_a)) {
-		exit(1);
-	}
+	if (stat(act->first, &stbuf_a))
+		return 0;
+	if (stat(act->second, &stbuf_b))
+		return 0;
 
-	switch (expr->m) {
-	case FCMP_EF:
-		return stbuf_a.st_ino == stbuf_b.st_ino
-			&& stbuf_a.st_dev == stbuf_b.st_dev;
-	case FCMP_NT:
+	switch (act->type) {
+	case TEST_SAMEFILE:
+		return stbuf_a.st_ino == stbuf_b.st_ino &&
+			stbuf_a.st_dev == stbuf_b.st_dev;
+	case TEST_NEWER:
 		return stbuf_a.st_mtime > stbuf_b.st_mtime;
-	case FCMP_OT:
+	case TEST_OLDER:
 		return stbuf_a.st_mtime < stbuf_b.st_mtime;
-	}
-}
-
-static bool eval_filestat(const struct e_filestat *expr)
-{
-	struct stat stbuf;
-
-	/* Cases that don't need a stat() */
-	switch (expr->m) {
-	case FILE_TTY: {
-		char *ptr;
-		int fd;
-
-		fd = strtol(expr->a, &ptr, 10);
-		if (*ptr || fd < 0) {
-			return false;
-		}
-		return isatty(fd);
-	}
-	case FILE_EXIST:
-		return !access(expr->a, F_OK);
-	case FILE_READ:
-		return !access(expr->a, R_OK);
-	case FILE_WRITE:
-		return !access(expr->a, W_OK);
-	case FILE_EXEC:
-		return !access(expr->a, X_OK);
-	default:
-		break;
-	}
-
-	/* lstat() or stat() */
-	if (expr->m == FILE_SYMLNK) {
-		if (lstat(expr->a, &stbuf)) {
-			exit(1);
-		}
-	} else {
-		if (stat(expr->a, &stbuf)) {
-			exit(1);
-		}
-	}
-
-	/* Actual check */
-	switch (expr->m) {
-	case FILE_BLOCK:
-		return S_ISBLK(stbuf.st_mode);
-	case FILE_CHAR:
-		return S_ISCHR(stbuf.st_mode);
-	case FILE_DIR:
-		return S_ISDIR(stbuf.st_mode);
-	case FILE_REG:
-		return S_ISREG(stbuf.st_mode);
-	case FILE_SGID:
-		return stbuf.st_mode & S_ISGID;
-	case FILE_STCKY:
-		return stbuf.st_mode & S_ISVTX;
-	case FILE_SYMLNK:
-		return S_ISLNK(stbuf.st_mode);
-	case FILE_USER:
-		return stbuf.st_uid == geteuid();
-	case FILE_FIFO:
-		return S_ISFIFO(stbuf.st_mode);
-	case FILE_SIZE:
-		return stbuf.st_size > 0;
-	case FILE_SOCK:
-		return S_ISSOCK(stbuf.st_mode);
-	case FILE_SUID:
-		return stbuf.st_mode & S_ISUID;
-
-	/* Should've already been covered */
-	case FILE_EXIST:
-	case FILE_READ:
-	case FILE_WRITE:
-	case FILE_EXEC:
-	case FILE_TTY:
 	default:
 		abort();
 	}
 }
 
-static bool eval(const struct expression *expr)
+/* Integer operations */
+static int get_ints(long *x,
+		    long *y,
+		    const struct test_action *act)
 {
-	switch (expr->t) {
-	case EXPR_NOT:
-		return !eval(expr->u.e_not.a);
-	case EXPR_BOOL:
-		return eval_bool(&expr->u.e_bool);
-	case EXPR_STR_CMP:
-		return eval_strcmp(&expr->u.e_strcmp);
-	case EXPR_STR_NULL:
-		return STRING_EMPTY(expr->u.e_strnul.a);
-	case EXPR_INT_CMP:
-		return eval_intcmp(&expr->u.e_intcmp);
-	case EXPR_FILE_CMP:
-		return eval_filecmp(&expr->u.e_filecmp);
-	case EXPR_FILE_STAT:
-		return eval_filestat(&expr->u.e_filestat);
+	char *ptr;
+
+	*x = strtol(act->first, &ptr, 0);
+	if (!*act->first || *ptr)
+		return -1;
+
+	*y = strtol(act->second, &ptr, 0);
+	if (!*act->second || *ptr)
+		return -1;
+
+	return 0;
+}
+
+static int int_cmp(const struct test_action *act)
+{
+	long x, y;
+
+	switch (act->type) {
+	case TEST_INT_EQ:
+		if (get_ints(&x, &y, act))
+			return -1;
+		return x == y;
+	case TEST_INT_NE:
+		if (get_ints(&x, &y, act))
+			return -1;
+		return x != y;
+	case TEST_INT_GT:
+		if (get_ints(&x, &y, act))
+			return -1;
+		return x > y;
+	case TEST_INT_GE:
+		if (get_ints(&x, &y, act))
+			return -1;
+		return x >= y;
+	case TEST_INT_LT:
+		if (get_ints(&x, &y, act))
+			return -1;
+		return x < y;
+	case TEST_INT_LE:
+		if (get_ints(&x, &y, act))
+			return -1;
+		return x <= y;
+	default:
+		abort();
 	}
 }
 
 /*
- * Usage: [ EXPRESSION ]
- *
- * Supported expressions:
- * -n STRING
- * -z STRING
- * STRING1 = STRING2
- * STRING1 == STRING2
- * STRING1 != STRING2
+ * Runs a struct test_action and returns the result.
+ * The value returned is a _true_ boolean, meaning
+ * 0 for false and nonzero for true.
  */
-int main(int argc, const char *argv[])
+static int run_action(const struct test_action *act)
 {
-	struct tokenlist tokens;
-	struct expression tree;
-
-	argv0 = argv[0];
-	if (is_bracket()) {
-		if (strcmp(argv[--argc], "]")) {
-			fprintf(stderr, "%s: missing ']'\n", argv[0]);
-			return 2;
-		}
+	switch (act->type) {
+	case TEST_BLOCK:
+	case TEST_CHAR:
+	case TEST_DIR:
+	case TEST_EXISTS:
+	case TEST_FILE:
+	case TEST_SGID:
+	case TEST_GROUP:
+	case TEST_SYMLINK:
+	case TEST_STICKY:
+	case TEST_OWNER:
+	case TEST_FIFO:
+	case TEST_READ:
+	case TEST_SIZE:
+	case TEST_SOCKET:
+	case TEST_SUID:
+	case TEST_WRITE:
+	case TEST_EXE:
+		return test_stat(act->type, act->first);
+	case TEST_TTY:
+		return test_tty(act->first);
+	case TEST_SAMEFILE:
+	case TEST_NEWER:
+	case TEST_OLDER:
+		return file_cmp(act);
+	case TEST_STR_ZERO:
+		return !act->first[0];
+	case TEST_STR_NONZERO:
+		return act->first[0];
+	case TEST_STR_EQ:
+		return !strcmp(act->first, act->second);
+	case TEST_STR_NE:
+		return strcmp(act->first, act->second);
+	case TEST_INT_EQ:
+	case TEST_INT_NE:
+	case TEST_INT_GT:
+	case TEST_INT_GE:
+	case TEST_INT_LT:
+	case TEST_INT_LE:
+		return int_cmp(act);
+	case TEST_INVALID:
+	default:
+		abort();
 	}
-	init_tokens(&tokens, argc);
-	parse_tokens(&tokens, argc, argv);
-	build_tree(&tree, &tokens);
-	return 0;
+}
+
+static int is_bracket(const char *argv0)
+{
+	char *buf;
+	int ret;
+
+	buf = strdup(argv0);
+	if (!buf) {
+		perror("unable to allocate");
+		exit(-1);
+	}
+
+	ret = !strcmp(basename(buf), "[");
+	free(buf);
+	return ret;
+}
+
+int main(int argc, char *argv[])
+{
+	struct test_action act;
+	const char *argv0;
+	int invert, ret;
+
+	/* General checks */
+	argv0 = argv[0];
+	if (is_bracket(argv0)) {
+		if (strcmp(argv[argc - 1], "]")) {
+			fprintf(stderr, "[: missing `]'\n");
+			return -1;
+		}
+		argc--;
+	}
+	if (argc > 1 && !strcmp(argv[1], "!")) {
+		invert = 1;
+		argv++;
+		argc--;
+	} else {
+		invert = 0;
+	}
+
+	switch (argc) {
+	/* [ ] */
+	case 1:
+		fprintf(stderr, "%s: missing operand\n",
+			argv0);
+		return -1;
+	/* [ x ] */
+	case 2:
+		/* Default action is "-n" */
+		act.type = TEST_STR_NONZERO;
+		act.first = argv[1];
+		break;
+	/* [ -f x ] */
+	case 3:
+		act.type = get_test_type(argv[1]);
+		act.first = argv[2];
+		act.second = "";
+		if (act.type == TEST_INVALID) {
+			fprintf(stderr, "%s: unknown flag: '%s'\n",
+				argv0, argv[1]);
+			return -1;
+		}
+		break;
+	/* [ x -eq y ] */
+	case 4:
+		act.type = get_test_type(argv[2]);
+		act.first = argv[1];
+		act.second = argv[3];
+		if (act.type == TEST_INVALID) {
+			fprintf(stderr, "%s: unknown flag: '%s'",
+				argv0, argv[2]);
+			return -1;
+		}
+		break;
+	/* Even more... */
+	default:
+		fprintf(stderr, "%s: too many operands\n", argv0);
+		return -1;
+	}
+
+
+	/*
+	 * We can optimize out a branch by using XOR here.
+	 * Since we know both "ret" and "invert" is
+	 * either 0 or 1, we can use this expression to
+	 * flip the result.
+	 */
+	ret = !run_action(&act);
+	return ret ^ invert;
 }
