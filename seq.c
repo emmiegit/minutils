@@ -93,11 +93,11 @@ int main(int argc, const char *argv[])
 	}
 	if (opt.increment > 0) {
 		for (n = opt.first; n <= opt.last; n += opt.increment) {
-			printf("%g\n", n);
+			printf("%g%s", n, opt.sep);
 		}
 	} else {
 		for (n = opt.first; n >= opt.last; n += opt.increment) {
-			printf("%g\n", n);
+			printf("%g%s", n, opt.sep);
 		}
 	}
 	return 0;
