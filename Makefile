@@ -17,14 +17,13 @@ debug: CFLAGS += -g
 debug: bin $(TARGETS)
 
 bin:
-	@echo '[MKDIR] bin'
+	@echo '[MD] bin'
 	@mkdir -p bin
 
 bin/%: %.c
 	@if [[ ! -L $< ]]; then \
 		echo '[CC] $(@F)'; \
 		$(CC) $(FLAGS) $(CFLAGS) -o $@ $<; \
-		strip $@; \
 	else \
 		echo '[LN] $(@F)'; \
 		source="$$(readlink '$<' | cut -d. -f1)"; \
@@ -37,6 +36,6 @@ bin/%: %.s
 	@$(CC) -s -nostdlib -o $@ $<
 
 clean:
-	@echo '[RMDIR] bin'
+	@echo '[RM] bin'
 	@rm -rf bin
 
