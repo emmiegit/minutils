@@ -58,16 +58,16 @@ static int strings(FILE *fh)
 	return ret;
 }
 
-/* Usage: strings [-min-length] file... */
+/* Usage: strings [-MIN-LENGTH] FILE... */
 int main(int argc, const char *argv[])
 {
 	int i;
 
-	i = 1;
 	opt.argv0 = argv[0];
 	opt.min_len = 2;
 
-	if (i > argc && argv[i][0] == '-') {
+	i = 1;
+	if (i < argc && argv[i][0] == '-') {
 		opt.min_len = atoi(argv[i] + 1);
 		if (!opt.min_len) {
 			fprintf(stderr, "%s: invalid number: %s\n",
