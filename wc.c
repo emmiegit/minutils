@@ -62,6 +62,7 @@ static void print_counts(const char *fn)
 	puts(fn);
 }
 
+/* Usage: wc [-c] [-l] [-w] [FILE...] */
 int main(int argc, char *argv[])
 {
 	int i, ch;
