@@ -18,39 +18,42 @@ static struct {
 
 static off_t parse_unit(char unit, off_t kilo)
 {
+	off_t result;
+
+	result = 1;
 	switch (unit) {
-	case 'K':
-	case 'k':
-		return kilo;
-		break;
-	case 'M':
-	case 'm':
-		return kilo * kilo;
-		break;
-	case 'G':
-	case 'g':
-		return kilo * kilo * kilo;
-		break;
-	case 'T':
-	case 't':
-		return kilo * kilo * kilo * kilo;
-		break;
-	case 'P':
-	case 'p':
-		return kilo * kilo * kilo * kilo * kilo;
-		break;
-	case 'E':
-	case 'e':
-		return kilo * kilo * kilo * kilo * kilo * kilo;
-		break;
-	case 'Z':
-	case 'z':
-		return kilo * kilo * kilo * kilo * kilo * kilo * kilo;
-		break;
 	case 'Y':
 	case 'y':
-		return kilo * kilo * kilo * kilo * kilo * kilo * kilo * kilo;
-		break;
+		result *= kilo;
+		/* FALLTHROUGH */
+	case 'Z':
+	case 'z':
+		result *= kilo;
+		/* FALLTHROUGH */
+	case 'E':
+	case 'e':
+		result *= kilo;
+		/* FALLTHROUGH */
+	case 'P':
+	case 'p':
+		result *= kilo;
+		/* FALLTHROUGH */
+	case 'T':
+	case 't':
+		result *= kilo;
+		/* FALLTHROUGH */
+	case 'G':
+	case 'g':
+		result *= kilo;
+		/* FALLTHROUGH */
+	case 'M':
+	case 'm':
+		result *= kilo;
+		/* FALLTHROUGH */
+	case 'K':
+	case 'k':
+		result *= kilo;
+		return result;
 	default:
 		return 0;
 	}
