@@ -18,14 +18,13 @@ static void print_env(const char *environ[])
 /* Usage: env [VARIABLE=value] program [ARGUMENTS] */
 int main(int argc, char *argv[], const char *environ[])
 {
+	char *val;
 	int i;
 
 	if (argc == 1) {
 		print_env(environ);
 		return 0;
 	} else for (i = 1; i < argc; i++) {
-		char *val;
-
 		val = strchr(argv[i], '=');
 		if (!val) {
 			break;
@@ -39,8 +38,8 @@ int main(int argc, char *argv[], const char *environ[])
 		}
 	}
 	if (execvp(argv[i], argv + i)) {
-		fprintf(stderr, "%s: %s\n",
-			argv[0], strerror(errno));
+		fprintf(stderr, "%s: %s: unable to exec: %s\n",
+			argv[0], argv[i], strerror(errno));
 		return 1;
 	}
 	return 0;

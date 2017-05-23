@@ -113,6 +113,7 @@ int main(int argc, char *argv[])
 
 	/* Execute program */
 	execvp(argv[1], &argv[1]);
-	fprintf(stderr, "%s: unable to exec: %s\n", argv[0], strerror(errno));
+	fprintf(stderr, "%s: %s: unable to exec: %s\n",
+		argv[0], argv[1], strerror(errno));
 	return 1;
 }
