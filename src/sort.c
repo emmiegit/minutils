@@ -157,11 +157,15 @@ int main(int argc, char *argv[])
 		}
 
 		for (i = 0; i < files.len; i++) {
-			files.array[i] = fopen(argv[i + optind], "r");
-			if (!files.array[i]) {
-				fprintf(stderr, "%s: %s: unable to open\n",
-					argv[0], argv[i]);
-				return 1;
+			if (strcmp(argv[i], "-")) {
+				files.array[i] = fopen(argv[i + optind], "r");
+				if (!files.array[i]) {
+					fprintf(stderr, "%s: %s: unable to open\n",
+						argv[0], argv[i]);
+					return 1;
+				}
+			} else {
+				files.array[i] = stdin;
 			}
 		}
 	}
