@@ -151,7 +151,7 @@ int main(int argc, const char *argv[])
 		print_names(signum);
 		return 0;
 	} else if (argv[1][0] == '-') {
-		opt.signum = get_signum(argv[2]);
+		opt.signum = get_signum(argv[1] + 1);
 		i = 2;
 	} else {
 		i = 1;
