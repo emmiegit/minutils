@@ -90,6 +90,29 @@ static void read_lines(FILE *fh)
 	} while (line);
 }
 
+static void print_all(void)
+{
+	size_t i;
+
+	for (i = 0; i < lines.len; i++) {
+		fputs(lines.array[i], stdout);
+		free(lines.array[i]);
+	}
+}
+
+static void print_unique(void)
+{
+	size_t i;
+
+	fputs(lines.array[0], stdout);
+	for (i = 1; i < lines.len; i++) {
+		if (strcmp(lines.array[i], lines.array[i - 1]))
+			fputs(lines.array[i], stdout);
+		free(lines.array[i - 1]);
+	}
+	free(lines.array[lines.len - 1]);
+}
+
 int main(int argc, char *argv[])
 {
 	size_t i;
@@ -106,7 +129,6 @@ int main(int argc, char *argv[])
 	while ((ch = getopt(argc, argv, "ur")) != -1) {
 		switch (ch) {
 		case 'u':
-			puts("-u TODO");
 			opt.unique = 1;
 			break;
 		case 'r':
@@ -161,7 +183,11 @@ int main(int argc, char *argv[])
 		? compare_reverse
 		: compare_normal);
 
-	for (i = 0; i < lines.len; i++)
-		fputs(lines.array[i], stdout);
+	if (opt.unique)
+		print_unique();
+	else
+		print_all();
+
+	free(lines.array);
 	return 0;
 }
