@@ -40,7 +40,7 @@ static int parse_duration(const char *str)
 	int mult;
 
 	amount = strtod(str, &ptr);
-	if (!*str || errno) {
+	if (!*str || errno || ISINF(amount) || ISNAN(amount)) {
 		fprintf(stderr, "%s: invalid duration: %s\n",
 			opt.argv0, ptr);
 		return -1;
