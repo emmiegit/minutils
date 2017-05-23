@@ -2,12 +2,12 @@
 
 #include <sys/types.h>
 #include <signal.h>
+#include <strings.h>
 
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <strings.h>
 
 #define ARRAY_SIZE(x)	((sizeof(x) / sizeof((x)[0])))
 
