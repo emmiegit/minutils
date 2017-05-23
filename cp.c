@@ -45,7 +45,7 @@ static int buffer_copy(int ifd, int ofd)
 		if (write(ofd, buf, len) != len) {
 			return 1;
 		}
-	} while (len == sizeof(buf));
+	} while (len);
 	return 0;
 }
 
