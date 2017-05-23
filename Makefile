@@ -1,10 +1,10 @@
 .PHONY: all force clean
 
-C_SOURCES := $(wildcard *.c)
-C_TARGETS := $(patsubst %.c,bin/%,$(C_SOURCES))
+C_SOURCES := $(wildcard src/*.c)
+C_TARGETS := $(patsubst src/%.c,bin/%,$(C_SOURCES))
 
-S_SOURCES := $(wildcard *.s)
-S_TARGETS := $(patsubst %.s,bin/%,$(S_SOURCES))
+S_SOURCES := $(wildcard src/*.s)
+S_TARGETS := $(patsubst src/%.s,bin/%,$(S_SOURCES))
 
 TARGETS   := $(C_TARGETS) $(S_TARGETS)
 
@@ -20,7 +20,7 @@ bin:
 	@echo '[MD] bin'
 	@mkdir -p bin
 
-bin/%: %.c
+bin/%: src/%.c
 	@if [[ ! -L $< ]]; then \
 		echo '[CC] $(@F)'; \
 		$(CC) $(FLAGS) $(CFLAGS) -o $@ $<; \
@@ -31,7 +31,7 @@ bin/%: %.c
 		ln -sf $${source} $(@F); \
 	fi
 
-bin/%: %.s
+bin/%: src/%.s
 	@echo '[AS] $(@F)'
 	@$(CC) -s -nostdlib -o $@ $<
 
