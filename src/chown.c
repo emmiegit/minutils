@@ -9,26 +9,25 @@
 #include <unistd.h>
 
 #include <errno.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 static struct {
 	const char *argv0;
-
 	uid_t uid;
 	gid_t gid;
-
-	unsigned deref : 1;
+	bool deref : 1;
 } opt;
 
 static void get_owner(char *user)
 {
 	char *group;
 	struct {
-		unsigned user   : 1;
-		unsigned group  : 1;
-		unsigned defgrp : 1;
+		bool user   : 1;
+		bool group  : 1;
+		bool defgrp : 1;
 	} s;
 
 	group = strchr(user, ':');
@@ -58,7 +57,7 @@ static void get_owner(char *user)
 	opt.uid = -1;
 	opt.gid = -1;
 	if (s.user) {
-		struct passwd *pwd;
+		const struct passwd *pwd;
 
 		pwd = getpwnam(user);
 		if (!pwd) {
@@ -72,7 +71,7 @@ static void get_owner(char *user)
 		}
 	}
 	if (s.group) {
-		struct group *grp;
+		const struct group *grp;
 
 		grp = getgrnam(group);
 		if (!grp) {

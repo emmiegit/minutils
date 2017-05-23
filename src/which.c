@@ -1,15 +1,16 @@
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include <errno.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 static struct {
 	const char *argv0;
-
-	unsigned all : 1;
+	bool all : 1;
 } opt;
 
 static struct {
@@ -19,9 +20,6 @@ static struct {
 	} *array;
 	size_t len;
 } paths;
-
-#define IS_EXECUTABLE(x)				\
-	(((x) & S_IXUSR) | ((x) & S_IXGRP) | ((x) & S_IXOTH))
 
 static void split_paths(size_t extra)
 {
@@ -95,7 +93,6 @@ static void setup(int i, int argc, const char *argv[])
 
 static void which(const char *program)
 {
-	struct stat stbuf;
 	struct path *ent;
 	size_t i;
 	int found;
@@ -106,16 +103,14 @@ static void which(const char *program)
 		ent->str[ent->len] = '/';
 		strcpy(ent->str + ent->len + 1, program);
 
-		if (stat(ent->str, &stbuf)) {
+		if (access(ent->str, X_OK)) {
 			continue;
 		}
-		if (IS_EXECUTABLE(stbuf.st_mode)) {
-			puts(ent->str);
-			if (!opt.all) {
-				return;
-			}
-			found = 1;
+		puts(ent->str);
+		if (!opt.all) {
+			return;
 		}
+		found = 1;
 	}
 	if (!found) {
 		printf("%s not found\n", program);

@@ -7,18 +7,18 @@
 #include <unistd.h>
 
 #include <errno.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 static struct {
 	const char *argv0;
-
-	unsigned group  : 1;
-	unsigned allgrp : 1;
-	unsigned name   : 1;
-	unsigned real   : 1;
-	unsigned user   : 1;
+	bool group  : 1;
+	bool allgrp : 1;
+	bool name   : 1;
+	bool real   : 1;
+	bool user   : 1;
 } opt;
 
 static void print_groups(const struct passwd *pwd)

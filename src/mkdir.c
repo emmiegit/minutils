@@ -1,18 +1,18 @@
-#define _POSIX_C_SOURCE	200809L
+#define _POSIX_C_SOURCE		200809L
 
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <libgen.h>
 
 #include <errno.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 static struct {
 	const char *argv0;
-
-	unsigned parents : 1;
+	bool parents : 1;
 } opt;
 
 static int do_parents_mkdir(const char *path)

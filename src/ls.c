@@ -3,13 +3,13 @@
 #include <dirent.h>
 
 #include <errno.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
 static struct {
 	const char *argv0;
-
-	unsigned all : 1;
+	bool all : 1;
 } opt;
 
 static int list(const char *path, int label)
@@ -62,6 +62,7 @@ int main(int argc, const char *argv[])
 	int i;
 
 	opt.argv0 = argv[0];
+
 	for (i = 1; i < argc; i++) {
 		if (argv[i][0] != '-') {
 			break;

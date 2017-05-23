@@ -1,12 +1,12 @@
 #include <errno.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 static struct {
 	const char *argv0;
-
-	unsigned quiet : 1;
+	bool quiet : 1;
 } opt;
 
 static FILE *open_file(const char *path)

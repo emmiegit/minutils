@@ -313,7 +313,7 @@ static int int_cmp(const struct test_action *act)
 /*
  * Runs a struct test_action and returns the result.
  * The value returned is a _true_ boolean, meaning
- * 0 for false and nonzero for true.
+ * 0 for 0 and nonzero for 1.
  */
 static int run_action(const struct test_action *act)
 {

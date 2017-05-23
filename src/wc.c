@@ -4,6 +4,7 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -15,9 +16,9 @@ static struct {
 } counts;
 
 static struct {
-	unsigned bytes : 1;
-	unsigned lines : 1;
-	unsigned words : 1;
+	bool bytes : 1;
+	bool lines : 1;
+	bool words : 1;
 } opt;
 
 static int ret;
@@ -26,7 +27,7 @@ static void count(FILE *fh)
 {
 	char buf[4096];
 	size_t i, bytes;
-	int inspace;
+	bool inspace;
 
 	inspace = 1;
 	memset(&counts, 0, sizeof(counts));
@@ -95,7 +96,7 @@ int main(int argc, char *argv[])
 		print_counts("");
 	} else for (i = optind; i < argc; i++) {
 		FILE *fh;
-		int opened;
+		bool opened;
 
 		if (strcmp(argv[i], "-")) {
 			fh = fopen(argv[i], "r");

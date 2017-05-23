@@ -1,12 +1,12 @@
 #include <errno.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 static struct {
 	const char *argv0;
-
-	unsigned null : 1;
+	bool null : 1;
 } opt;
 
 static int putnull(const char *str)

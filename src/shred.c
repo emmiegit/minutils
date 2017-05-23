@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include <errno.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -19,9 +20,8 @@
 static struct {
 	const char *argv0;
 	unsigned int iters;
-
-	unsigned delete : 1;
-	unsigned zero   : 1;
+	bool delete : 1;
+	bool zero   : 1;
 } opt;
 
 static const char *patterns[] = {

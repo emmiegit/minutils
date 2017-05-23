@@ -5,12 +5,13 @@
 #include <unistd.h>
 
 #include <errno.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 static struct {
-	unsigned dir : 1;
+	bool dir : 1;
 } opt;
 
 static int get_suffix(const char *str)

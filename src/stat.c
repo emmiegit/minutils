@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include <errno.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -17,8 +18,7 @@
 static struct {
 	const char *argv0;
 	const char *format;
-
-	unsigned dereference : 1;
+	bool deref : 1;
 } opt;
 
 enum file_type {
@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
 	while ((ch = getopt(argc, argv, "Lc:")) != -1) {
 		switch (ch) {
 		case 'L':
-			opt.dereference = 1;
+			opt.deref = 1;
 			break;
 		case 'c':
 			opt.format = optarg;
@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	ret = 0;
-	stat_func = (opt.dereference) ? stat : lstat;
+	stat_func = (opt.deref) ? stat : lstat;
 	for (i = optind; i < argc; i++) {
 		if (do_stat(argv[i], stat_func)) {
 			fprintf(stderr, "%s: %s: %s\n",
