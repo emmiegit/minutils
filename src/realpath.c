@@ -43,9 +43,8 @@ int main(int argc, const char *argv[])
 
 	ret = 0;
 	for (; i < argc; i++) {
-		if (do_realpath(argv[i])) {
+		if (do_realpath(argv[i]))
 			ret = 1;
-		}
 	}
 	return ret;
 }

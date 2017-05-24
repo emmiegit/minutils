@@ -57,9 +57,8 @@ static int do_readlink(const char *path)
 			opt.argv0, path, strerror(errno));
 		return -1;
 	}
-	if (ret == sizeof(buf)) {
+	if (ret == sizeof(buf))
 		return do_dynamic_readlink(path);
-	}
 	buf[ret] = '\0';
 	printf("%s%c", buf, opt.end);
 	return 0;
@@ -91,9 +90,8 @@ int main(int argc, const char *argv[])
 
 	ret = 0;
 	for (; i < argc; i++) {
-		if (do_readlink(argv[i])) {
+		if (do_readlink(argv[i]))
 			ret = 1;
-		}
 	}
 	return ret;
 }

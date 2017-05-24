@@ -268,13 +268,10 @@ int main(int argc, char *argv[])
 			argv[0], RAND_SOURCE, strerror(errno));
 		return 1;
 	}
-
 	for (; i < argc; i++) {
-		if (shred(argv[i])) {
+		if (shred(argv[i]))
 			return 1;
-		}
 	}
-
 	if (close(randfd)) {
 		fprintf(stderr, "%s: %s: %s\n",
 			argv[0], RAND_SOURCE, strerror(errno));

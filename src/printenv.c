@@ -14,9 +14,8 @@ static int putnull(const char *str)
 	size_t len;
 
 	len = strlen(str);
-	if (fwrite(str, len + 1, 1, stdout) != 1) {
+	if (fwrite(str, len + 1, 1, stdout) != 1)
 		return EOF;
-	}
 	return 0;
 }
 

@@ -66,9 +66,8 @@ static off_t parse_size(void)
 	char unit;
 	char *ptr;
 
-	if (!opt.size) {
+	if (!opt.size)
 		return 0;
-	}
 	len = strlen(opt.size);
 	switch (len) {
 	case 0:

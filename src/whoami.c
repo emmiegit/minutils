@@ -7,13 +7,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define UNUSED(x)	((void)(x))
+
 /* Usage: whoami */
 int main(int argc, const char *argv[])
 {
 	struct passwd *pw;
 	uid_t uid;
 
-	(void)argc;
+	UNUSED(argc);
 
 	uid = geteuid();
 	pw = getpwuid(uid);

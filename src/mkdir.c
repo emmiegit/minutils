@@ -20,9 +20,8 @@ static int do_parents_mkdir(const char *path)
 	const char *parent;
 	char *path2;
 
-	if (!strcmp(path, "/") || !strcmp(path, ".")) {
+	if (!strcmp(path, "/") || !strcmp(path, "."))
 		return 0;
-	}
 	path2 = strdup(path);
 	if (!path2) {
 		fprintf(stderr, "%s: unable to allocate: %s\n",
@@ -76,9 +75,8 @@ int main(int argc, const char *argv[])
 	mkdir_func = (opt.parents) ? do_parents_mkdir : do_mkdir;
 	ret = 0;
 	for (; i < argc; i++) {
-		if (mkdir_func(argv[i])) {
+		if (mkdir_func(argv[i]))
 			ret = 1;
-		}
 	}
 	return ret;
 }

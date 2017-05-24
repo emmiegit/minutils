@@ -21,21 +21,18 @@ static int get_suffix(const char *str)
 
 	len = strlen(str);
 	for (i = len - 1; i >= 0; i--) {
-		if (str[i] == 'X') {
+		if (str[i] == 'X')
 			return len - i - 1;
-		}
 	}
 	exit(-1);
 }
 
 static int replace_dir(const char *path)
 {
-	if (unlink(path)) {
+	if (unlink(path))
 		return 1;
-	}
-	if (mkdir(path, 0777)) {
+	if (mkdir(path, 0777))
 		return 1;
-	}
 	return 0;
 }
 
@@ -79,9 +76,8 @@ int main(int argc, char *argv[])
 			argv[0], template, strerror(errno));
 		return 1;
 	}
-	if (opt.dir && replace_dir(template)) {
+	if (opt.dir && replace_dir(template))
 		return 1;
-	}
 	puts(template);
 	return 0;
 }

@@ -19,8 +19,7 @@ int main(int argc, const char *argv[])
 			argv[0], argv[1]);
 		exit(1);
 	}
-	if (sleep(val)) {
+	if (sleep(val))
 		return 1;
-	}
 	return 0;
 }

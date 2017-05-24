@@ -6,8 +6,8 @@
 /* Usage: tty [-s] */
 int main(int argc, const char *argv[])
 {
-	int verbose, i;
 	const char *tty;
+	int verbose, i;
 
 	verbose = 1;
 	for (i = 1; i < argc; i++) {
@@ -21,11 +21,10 @@ int main(int argc, const char *argv[])
 	}
 	tty = ttyname(STDIN_FILENO);
 	if (verbose) {
-		if (tty) {
+		if (tty)
 			puts(tty);
-		} else {
+		else
 			puts("not a tty");
-		}
 	}
 	return tty == NULL;
 }

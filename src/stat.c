@@ -34,23 +34,22 @@ enum file_type {
 
 static enum file_type get_file_type(mode_t mode)
 {
-	if (S_ISREG(mode)) {
+	if (S_ISREG(mode))
 		return FILE_REGULAR;
-	} else if (S_ISDIR(mode)) {
+	else if (S_ISDIR(mode))
 		return FILE_DIRECTORY;
-	} else if (S_ISCHR(mode)) {
+	else if (S_ISCHR(mode))
 		return FILE_CHARACTER;
-	} else if (S_ISBLK(mode)) {
+	else if (S_ISBLK(mode))
 		return FILE_BLOCK;
-	} else if (S_ISFIFO(mode)) {
+	else if (S_ISFIFO(mode))
 		return FILE_FIFO;
-	} else if (S_ISLNK(mode)) {
+	else if (S_ISLNK(mode))
 		return FILE_SYMLINK;
-	} else if (S_ISSOCK(mode)) {
+	else if (S_ISSOCK(mode))
 		return FILE_SOCKET;
-	} else {
+	else
 		return FILE_UNKNOWN;
-	}
 }
 
 static void print_format(const char *path, const struct stat *stbuf)

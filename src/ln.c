@@ -15,16 +15,15 @@
 static struct {
 	const char *argv0;
 
-	unsigned symbolic : 1;
+	bool symbolic : 1;
 } opt;
 
 static int single_link(const char *source, const char *dest)
 {
-	if (opt.symbolic) {
+	if (opt.symbolic)
 		return symlink(source, dest);
-	} else {
+	else
 		return link(source, dest);
-	}
 }
 
 static int multi_link(int count, const char *files[])
@@ -120,9 +119,8 @@ int main(int argc, const char *argv[])
 		}
 		break;
 	default:
-		if (multi_link(argc - i, argv + i)) {
+		if (multi_link(argc - i, argv + i))
 			return 1;
-		}
 	}
 	return 0;
 }

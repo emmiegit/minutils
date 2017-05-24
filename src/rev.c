@@ -23,6 +23,7 @@ static struct {
 static void append_to_line_list(void)
 {
 	char *str;
+
 	if (lines.length >= lines.capacity) {
 		void *ptr;
 		size_t new_capacity;
@@ -104,15 +105,13 @@ int main(int argc, char *argv[])
 			FILE *fh;
 			int ch;
 
-			if (!strcmp(argv[i], "-")) {
+			if (!strcmp(argv[i], "-"))
 				fh = stdin;
-			} else {
+			else
 				fh = fopen(argv[i], "r");
-			}
 
-			if (!fh) {
+			if (!fh)
 				return 1;
-			}
 			while ((ch = fgetc(fh)) != EOF) {
 				if (ch != '\n') {
 					append_to_char_list(ch);
@@ -132,23 +131,18 @@ int main(int argc, char *argv[])
 
 	free(line.array);
 #ifdef REVERSE_LINES
-	for (i = lines.length - 1; i >= 0; i--) {
+	for (i = lines.length - 1; i >= 0; i--)
 		printf("%s\n", lines.array[i]);
-	}
 #else
 	for (i = 0; i < (int)lines.length; i++) {
 		int j;
 
 		j = strlen(lines.array[i]) - 1;
-		for (; j >= 0; j--) {
+		for (; j >= 0; j--)
 			putchar(lines.array[i][j]);
-		}
-		if (i < (int)lines.length - 1) {
+		if (i < (int)lines.length - 1)
 			putchar('\n');
-		}
 	}
 #endif
 	return 0;
 }
-
-

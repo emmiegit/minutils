@@ -23,11 +23,10 @@ static struct {
 
 static void print_groups(const struct passwd *pwd)
 {
-	if (!opt.name) {
+	if (!opt.name)
 		printf("%d", pwd->pw_gid);
-	} else {
+	else
 		fputs(pwd->pw_name, stdout);
-	}
 	if (opt.allgrp) {
 		gid_t groups[NGROUPS_MAX + 1];
 		int count, i;
@@ -41,16 +40,14 @@ static void print_groups(const struct passwd *pwd)
 		for (i = 0; i < count; i++) {
 			struct group *grp;
 
-			if (groups[i] == pwd->pw_gid) {
+			if (groups[i] == pwd->pw_gid)
 				continue;
-			}
 			putchar(' ');
 			grp = getgrgid(groups[i]);
-			if (!opt.name || !grp) {
+			if (!opt.name || !grp)
 				printf("%d", groups[i]);
-			} else {
+			else
 				fputs(grp->gr_name, stdout);
-			}
 		}
 	}
 	putchar('\n');
@@ -70,15 +67,13 @@ static void ids(void)
 	}
 
 	if (opt.user) {
-		if (!opt.name) {
+		if (!opt.name)
 			printf("%d\n", uid);
-		} else {
+		else
 			puts(pwd->pw_name);
-		}
 	}
-	if (opt.group) {
+	if (opt.group)
 		print_groups(pwd);
-	}
 }
 
 static void default_ids(void)
@@ -102,9 +97,8 @@ static void default_ids(void)
 	       pwd->pw_name,
 	       pwd->pw_gid);
 	grp = getgrgid(pwd->pw_gid);
-	if (grp) {
+	if (grp)
 		printf("(%s)", grp->gr_name);
-	}
 	putchar(' ');
 	count = getgroups(sizeof(groups), groups);
 	if (count < 0) {
@@ -115,12 +109,10 @@ static void default_ids(void)
 	for (i = 0; i < count; i++) {
 		grp = getgrgid(groups[i]);
 		printf("%d", groups[i]);
-		if (grp) {
+		if (grp)
 			printf("(%s)", grp->gr_name);
-		}
-		if (i < count - 1) {
+		if (i < count - 1)
 			putchar(',');
-		}
 	}
 	putchar('\n');
 }
@@ -171,10 +163,9 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	if (opt.user || opt.group) {
+	if (opt.user || opt.group)
 		ids();
-	} else {
+	else
 		default_ids();
-	}
 	return 0;
 }

@@ -40,9 +40,8 @@ static int open_nohup(void)
 	int fd;
 
 	fd = open("nohup.out", O_CREAT | O_APPEND | O_WRONLY, 0600);
-	if (fd >= 0) {
+	if (fd >= 0)
 		return fd;
-	}
 
 	pwd = getpwuid(geteuid());
 	path = malloc(strlen(pwd->pw_name) + strlen("/nohup.out") + 1);

@@ -13,9 +13,8 @@ static FILE *open_file(const char *path)
 {
 	FILE *fh;
 
-	if (!strcmp(path, "-")) {
+	if (!strcmp(path, "-"))
 		return stdin;
-	}
 	fh = fopen(path, "r");
 	if (!fh) {
 		fprintf(stderr, "%s: %s: %s\n",
@@ -44,9 +43,8 @@ static int do_compare(FILE *fh1, FILE *fh2)
 	int ch1, ch2;
 	size_t byte;
 
-	if (fh1 == fh2) {
+	if (fh1 == fh2)
 		return 0;
-	}
 
 	byte = 0;
 	do {

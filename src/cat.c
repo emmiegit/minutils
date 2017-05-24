@@ -39,9 +39,8 @@ int main(int argc, const char *argv[])
 				argv[0], argv[i], strerror(errno));
 			return 1;
 		}
-		if (cat(fd)) {
+		if (cat(fd))
 			return 1;
-		}
 		if (close(fd)) {
 			fprintf(stderr, "%s: %s: %s\n",
 				argv[0], argv[i], strerror(errno));

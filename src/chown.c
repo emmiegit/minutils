@@ -66,9 +66,8 @@ static void get_owner(char *user)
 			exit(1);
 		}
 		opt.uid = pwd->pw_uid;
-		if (s.defgrp) {
+		if (s.defgrp)
 			opt.gid = pwd->pw_gid;
-		}
 	}
 	if (s.group) {
 		const struct group *grp;

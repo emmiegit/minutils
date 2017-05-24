@@ -7,12 +7,15 @@
 #include <stdio.h>
 #include <string.h>
 
+#define UNUSED(x)	((void)(x))
+
 /* Usage: pwd */
 int main(int argc, const char *argv[])
 {
 	char cwd[PATH_MAX];
 
-	(void)argc;
+	UNUSED(argc);
+
 	if (getcwd(cwd, sizeof(cwd))) {
 		printf("%s\n", cwd);
 	} else {
@@ -20,6 +23,5 @@ int main(int argc, const char *argv[])
 			argv[0], strerror(errno));
 		return 1;
 	}
-
 	return 0;
 }

@@ -10,9 +10,8 @@ static void print_env(const char *environ[])
 {
 	const char **env;
 
-	for (env = environ; *env; env++) {
+	for (env = environ; *env; env++)
 		puts(*env);
-	}
 }
 
 /* Usage: env [VARIABLE=value] program [ARGUMENTS] */
@@ -26,9 +25,8 @@ int main(int argc, char *argv[], const char *environ[])
 		return 0;
 	} else for (i = 1; i < argc; i++) {
 		val = strchr(argv[i], '=');
-		if (!val) {
+		if (!val)
 			break;
-		}
 		val[0] = '\0';
 		val++;
 		if (setenv(argv[i], val, 1)) {

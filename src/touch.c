@@ -48,9 +48,8 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	for (i = 1; i < argc; i++) {
-		if (touch(argv[i])) {
+		if (touch(argv[i]))
 			return 1;
-		}
 	}
 	return 0;
 }

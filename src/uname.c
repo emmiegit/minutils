@@ -1,15 +1,16 @@
 #include <sys/utsname.h>
 
 #include <errno.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
 static struct {
-	unsigned sys     : 1;
-	unsigned node    : 1;
-	unsigned release : 1;
-	unsigned version : 1;
-	unsigned machine : 1;
+	bool sys     : 1;
+	bool node    : 1;
+	bool release : 1;
+	bool version : 1;
+	bool machine : 1;
 } opt;
 
 /* Usage: uname [-a] [-s] [-n] [-r] [-v] [-m] */
@@ -64,33 +65,28 @@ int main(int argc, const char *argv[])
 		flag = 1;
 	}
 	if (opt.node) {
-		if (flag) {
+		if (flag)
 			putchar(' ');
-		}
 		fputs(uts.nodename, stdout);
 		flag = 1;
 	}
 	if (opt.release) {
-		if (flag) {
+		if (flag)
 			putchar(' ');
-		}
 		fputs(uts.release, stdout);
 		flag = 1;
 	}
 	if (opt.version) {
-		if (flag) {
+		if (flag)
 			putchar(' ');
-		}
 		fputs(uts.version, stdout);
 		flag = 1;
 	}
 	if (opt.machine) {
-		if (flag) {
+		if (flag)
 			putchar(' ');
-		}
 		fputs(uts.machine, stdout);
 	}
 	putchar('\n');
-
 	return 0;
 }

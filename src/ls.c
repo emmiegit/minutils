@@ -29,9 +29,8 @@ static int list(const char *path, int label)
 		return 0;
 	}
 	if (label) {
-		if (notfirst) {
+		if (notfirst)
 			putchar('\n');
-		}
 		notfirst = 1;
 		printf("%s:\n", path);
 	}
@@ -43,9 +42,8 @@ static int list(const char *path, int label)
 		return 1;
 	}
 	while ((ent = readdir(dh))) {
-		if (ent->d_name[0] == '.' && !opt.all) {
+		if (ent->d_name[0] == '.' && !opt.all)
 			continue;
-		}
 		printf("%s\n", ent->d_name);
 	}
 	if (closedir(dh)) {
@@ -76,17 +74,14 @@ int main(int argc, const char *argv[])
 	}
 
 	if (i == argc) {
-		if (list(".", 0)) {
+		if (list(".", 0))
 			return 1;
-		}
 	} else if (i == argc - 1) {
-		if (list(argv[i], 0)) {
+		if (list(argv[i], 0))
 			return 1;
-		}
 	} else for (; i < argc; i++) {
-		if (list(argv[i], 1)) {
+		if (list(argv[i], 1))
 			return 1;
-		}
 	}
 	return 0;
 }

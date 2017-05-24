@@ -17,9 +17,8 @@ static mode_t get_mode(const char *str)
 {
 	mode_t mode;
 
-	if (!*str) {
+	if (!*str)
 		return (mode_t)-1;
-	}
 	mode = 0;
 	while (*str) {
 		if ('0' < *str && *str < '7') {

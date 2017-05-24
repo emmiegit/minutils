@@ -14,19 +14,15 @@ static int mmap_copy(int ifd, int ofd)
 	void *ptr;
 
 	len = lseek(ifd, 0, SEEK_END);
-	if (len <= 0) {
+	if (len <= 0)
 		return 1;
-	}
 	ptr = mmap(NULL, len, PROT_READ, MAP_PRIVATE, ifd, 0);
-	if (ptr == MAP_FAILED) {
+	if (ptr == MAP_FAILED)
 		return 1;
-	}
-	if (write(ofd, ptr, len) != len) {
+	if (write(ofd, ptr, len) != len)
 		return 1;
-	}
-	if (munmap(ptr, len)) {
+	if (munmap(ptr, len))
 		return 1;
-	}
 	return 0;
 }
 
@@ -37,14 +33,12 @@ static int buffer_copy(int ifd, int ofd)
 
 	do {
 		len = read(ifd, buf, sizeof(buf));
-		if (len < 0) {
+		if (len < 0)
 			return 1;
-		} else if (len == 0) {
+		else if (len == 0)
 			return 0;
-		}
-		if (write(ofd, buf, len) != len) {
+		if (write(ofd, buf, len) != len)
 			return 1;
-		}
 	} while (len);
 	return 0;
 }
@@ -73,11 +67,9 @@ int main(int argc, char *argv[])
 	}
 
 	ret = mmap_copy(ifd, ofd);
-	if (ret) {
+	if (ret)
 		ret = buffer_copy(ifd, ofd);
-	}
-	if (close(ifd) || close(ofd)) {
+	if (close(ifd) || close(ofd))
 		return 1;
-	}
 	return ret;
 }

@@ -35,9 +35,8 @@ static void split_paths(size_t extra)
 
 	paths.len = 1;
 	for (i = 0; path_env[i]; i++) {
-		if (path_env[i] == ':') {
+		if (path_env[i] == ':')
 			paths.len++;
-		}
 	}
 
 	paths.array = malloc(sizeof(struct path) * paths.len);
@@ -84,9 +83,8 @@ static void setup(int i, int argc, const char *argv[])
 	max = 0;
 	for (; i < argc; i++) {
 		len = strlen(argv[i]);
-		if (len > max) {
+		if (len > max)
 			max = len;
-		}
 	}
 	split_paths(max + 2);
 }
@@ -103,13 +101,11 @@ static void which(const char *program)
 		ent->str[ent->len] = '/';
 		strcpy(ent->str + ent->len + 1, program);
 
-		if (access(ent->str, X_OK)) {
+		if (access(ent->str, X_OK))
 			continue;
-		}
 		puts(ent->str);
-		if (!opt.all) {
+		if (!opt.all)
 			return;
-		}
 		found = 1;
 	}
 	if (!found) {
@@ -124,15 +120,13 @@ int main(int argc, const char *argv[])
 
 	opt.argv0 = argv[0];
 	for (i = 1; i < argc; i++) {
-		if (argv[i][0] != '-') {
+		if (argv[i][0] != '-')
 			break;
-		} else if (!strcmp(argv[i], "-a")) {
+		else if (!strcmp(argv[i], "-a"))
 			opt.all = 1;
-		}
 	}
 	setup(i, argc, argv);
-	for (; i < argc; i++) {
+	for (; i < argc; i++)
 		which(argv[i]);
-	}
 	return 0;
 }
