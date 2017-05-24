@@ -49,9 +49,8 @@ int main(int argc, const char *argv[])
 			return 1;
 		}
 	}
-	if (!flag) {
+	if (!flag)
 		opt.sys = 1;
-	}
 
 	if (uname(&uts)) {
 		fprintf(stderr, "%s: %s\n",
