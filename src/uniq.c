@@ -62,6 +62,7 @@ static int line_add(char *line)
 			return 0;
 		}
 		if (!strcmp(bucket->str, line)) {
+			free(line);
 			bucket->count++;
 			return 0;
 		}
@@ -99,17 +100,29 @@ static int line_iterate(line_iter_cbf cbf, void *arg)
 
 static int print_count(void *arg, char *line, unsigned long count)
 {
+	int errsave;
+
 	UNUSED(arg);
 
-	return fprintf(opt.output_fn, "%6lu  %s", count, line);
+	fprintf(opt.output_fn, "%4lu %s", count, line);
+	errsave = errno;
+	free(line);
+	errno = errsave;
+	return !!errsave;
 }
 
 static int print_only(void *arg, char *line, unsigned long count)
 {
+	int errsave;
+
 	UNUSED(arg);
 	UNUSED(count);
 
-	return fputs(line, opt.output_fn) == EOF;
+	fputs(line, opt.output_fn);
+	errsave = errno;
+	free(line);
+	errno = errsave;
+	return !!errsave;
 }
 
 static int slurp_and_print(void)
