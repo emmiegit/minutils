@@ -82,17 +82,16 @@ static int line_iterate(line_iter_cbf cbf, void *arg)
 
 	for (i = 0; i < ARRAY_SIZE(lines.buckets); i++) {
 		bucket = &lines.buckets[i];
-		if (bucket->str) {
+		if (!bucket->str)
+			continue;
+		if (cbf(arg, bucket->str, bucket->count))
+			return -1;
+		while (bucket->next) {
+			bucket = bucket->next;
+			if (!bucket->str)
+				break;
 			if (cbf(arg, bucket->str, bucket->count))
 				return -1;
-
-			while (bucket->next) {
-				bucket = bucket->next;
-				if (!bucket->str)
-					break;
-				if (cbf(arg, bucket->str, bucket->count))
-					return -1;
-			}
 		}
 	}
 	return 0;
@@ -129,9 +128,10 @@ static int slurp_and_print(void)
 					opt.argv0, opt.input, strerror(errno));
 				return 1;
 			}
-			return 0;
+			break;
 		}
 		if (line_add(line)) {
+			free(line);
 			fprintf(stderr, "%s: %s\n",
 				opt.argv0, strerror(errno));
 			return 1;
