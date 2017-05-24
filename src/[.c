@@ -64,29 +64,8 @@ struct test_action {
  * Get the appropriate action from the test flag.
  * Doesn't print any errors.
  */
-static enum test_type get_test_type(const char *flag)
+static enum test_type get_test_type_short(const char *flag)
 {
-	/*
-	 * I used gotos because switchs within switches
-	 * look hidiously unreadable.
-	 *
-	 * I've placed traps to catch leaks between branches.
-	 */
-	switch (strlen(flag)) {
-	case 2:
-		goto flags1;
-	case 3:
-		goto flags2;
-	case 1:
-		if (flag[0] == '=')
-			return TEST_STR_EQ;
-		/* FALLTHROUGH */
-	default:
-		return TEST_INVALID;
-	}
-	assert(0);
-
-flags1:
 	if (flag[0] != '-') {
 		if      (!strcmp(flag, "=="))
 			return TEST_STR_EQ;
@@ -144,9 +123,10 @@ flags1:
 	default:
 		return TEST_INVALID;
 	}
-	assert(0);
+}
 
-flags2:
+static enum test_type get_test_type_long(const char *flag)
+{
 	if      (!strcmp(flag, "-eq")) return TEST_INT_EQ;
 	else if (!strcmp(flag, "-ne")) return TEST_INT_NE;
 	else if (!strcmp(flag, "-gt")) return TEST_INT_GT;
@@ -157,6 +137,22 @@ flags2:
 	else if (!strcmp(flag, "-nt")) return TEST_NEWER;
 	else if (!strcmp(flag, "-ot")) return TEST_OLDER;
 	else                           return TEST_INVALID;
+}
+
+static enum test_type get_test_type(const char *flag)
+{
+	switch (strlen(flag)) {
+	case 2:
+		return get_test_type_short(flag);
+	case 3:
+		return get_test_type_long(flag);
+	case 1:
+		if (flag[0] == '=')
+			return TEST_STR_EQ;
+		/* FALLTHROUGH */
+	default:
+		return TEST_INVALID;
+	}
 }
 
 /* File operations */
