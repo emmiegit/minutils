@@ -11,6 +11,7 @@
 #include <string.h>
 
 static struct {
+	const char *argv0;
 	bool dir : 1;
 } opt;
 
@@ -27,12 +28,40 @@ static int get_suffix(const char *str)
 	exit(-1);
 }
 
-static int replace_dir(const char *path)
+static int make_temp_dir(char *template)
 {
-	if (unlink(path))
-		return 1;
-	if (mkdir(path, 0777))
-		return 1;
+	if (!mkdtemp(template)) {
+		if (errno == EINVAL)
+			fprintf(stderr, "%s: template does not end in exactly 'XXXXX': %s\n",
+				opt.argv0, template);
+		else
+			fprintf(stderr, "%s: %s\n",
+				opt.argv0, strerror(errno));
+		return -1;
+	}
+	return 0;
+}
+
+static int make_temp_file(char *template)
+{
+	int fd;
+
+	if (!strstr(template, "XXXXX")) {
+		fprintf(stderr, "%s: too few X's in template: %s\n",
+			opt.argv0, template);
+		return -1;
+	}
+	fd = mkstemps(template, get_suffix(template));
+	if (fd < 0) {
+		fprintf(stderr, "%s: %s\n",
+			opt.argv0, strerror(errno));
+		return -1;
+	}
+	if (close(fd)) {
+		fprintf(stderr, "%s: %s: %s\n",
+			opt.argv0, template, strerror(errno));
+		return -1;
+	}
 	return 0;
 }
 
@@ -40,8 +69,9 @@ static int replace_dir(const char *path)
 int main(int argc, char *argv[])
 {
 	char *template;
-	int i, fd;
+	int i;
 
+	opt.argv0 = argv[0];
 	for (i = 1; i < argc; i++) {
 		if (argv[i][0] != '-') {
 			break;
@@ -60,24 +90,13 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	template = argv[i];
-	if (!strstr(template, "XXXXX")) {
-		fprintf(stderr, "%s: too few X's in template: %s\n",
-			argv[0], template);
-		return 1;
+	if (opt.dir) {
+		if (make_temp_dir(template))
+			return 1;
+	} else {
+		if (make_temp_file(template))
+			return 1;
 	}
-	fd = mkstemps(template, get_suffix(template));
-	if (fd < 0) {
-		fprintf(stderr, "%s: %s\n",
-			argv[0], strerror(errno));
-		return 1;
-	}
-	if (close(fd)) {
-		fprintf(stderr, "%s: %s: %s\n",
-			argv[0], template, strerror(errno));
-		return 1;
-	}
-	if (opt.dir && replace_dir(template))
-		return 1;
 	puts(template);
 	return 0;
 }

@@ -48,7 +48,6 @@ int main(int argc, const char *argv[])
 		fprintf(stderr, "usage: %s seconds\n", argv[0]);
 		return 1;
 	}
-
 	if (parse_duration(&duration, argv[1])) {
 		fprintf(stderr, "%s: invalid duration: %s\n",
 			argv[0], argv[1]);
