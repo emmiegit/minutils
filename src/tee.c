@@ -7,7 +7,7 @@
 #include <string.h>
 
 /* Usage: tee [-a] [FILE...] */
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
 	char buf[4096];
 	ssize_t n;
