@@ -146,7 +146,7 @@ static void copy_format(struct format *fmt, const char *str)
 
 	fmt->style = buf;
 
-	for (i = 0; str[i] && i < sizeof(buf) - 2; i++) {
+	for (i = 1; str[i] && i < sizeof(buf); i++) {
 		switch (str[i]) {
 		case '\'':
 		case '#':
@@ -163,7 +163,6 @@ static void copy_format(struct format *fmt, const char *str)
 		case '7':
 		case '8':
 		case '9':
-			buf[i + 1] = str[i];
 			break;
 		case 'd':
 		case 'i':
@@ -200,16 +199,15 @@ static void copy_format(struct format *fmt, const char *str)
 			exit(1);
 		}
 	}
-	if (i == sizeof(buf) - 2) {
+	if (i == sizeof(buf)) {
 		fprintf(stderr, "%s: format string too long\n",
 			argv0);
 		exit(1);
 	}
 
 end:
-	buf[0] = '%';
-	buf[i + 1] = str[i];
-	buf[i + 2] = '\0';
+	memcpy(buf, str, i);
+	buf[i] = '\0';
 }
 
 static void print_format(const struct format *fmt)
@@ -233,24 +231,26 @@ int main(int argc, const char *argv[])
 	argv0 = argv[0];
 	str = argv[1];
 
-	while (*str++) {
+	for (; *str; str++) {
 		switch (*str) {
 		case '\\':
-			print_escape(++str);
+			str++;
+			print_escape(str);
 			if (!*str)
 				return 0;
 			break;
 		case '%':
-			str++;
-			if (*str == '%') {
+			if (str[1] == '%') {
 				putchar('%');
-				break;
+			} else {
+				copy_format(&fmt, str);
+				print_format(&fmt);
 			}
-			copy_format(&fmt, ++str);
-			print_format(&fmt);
 			break;
+#if 0
 		default:
 			putchar(*str);
+#endif
 		}
 	}
 	return 0;
