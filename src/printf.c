@@ -10,27 +10,36 @@
 #define TOLOWER(x)		((x) | 0x20)
 
 static const char *argv0;
+static struct {
+	const char **array;
+	int count;
+} args;
 
 struct format {
 	const char *style;
 	enum {
 		FMT_DECIMAL,
-		FMT_UNSIGNED,
 		FMT_FLOAT,
 		FMT_CHAR,
-		FMT_STRING,
-		FMT_INTERP, /* %b */
-		FMT_POSIX   /* %q */
+		FMT_STRING
 	} type;
-	union {
-		signed long n;
-		unsigned long u;
-		double f;
-		char c;
-		const char *s;
-	} value;
 };
 
+/* Utilities */
+static const char *next_arg(void)
+{
+	const char *arg;
+
+	if (!args.count)
+		return NULL;
+
+	arg = *args.array;
+	args.array++;
+	args.count--;
+	return arg;
+}
+
+/* For \ escapes */
 static unsigned char read_octal(const char **str, size_t len)
 {
 	unsigned char sum;
@@ -139,19 +148,21 @@ static void print_escape(const char *str)
 	}
 }
 
-static void copy_format(struct format *fmt, const char *str)
+/* For % formats */
+static void copy_format(struct format *fmt, const char **str)
 {
 	static char buf[32];
 	size_t i;
 
 	fmt->style = buf;
 
-	for (i = 1; str[i] && i < sizeof(buf); i++) {
-		switch (str[i]) {
+	for (i = 1; (*str)[i] && i < sizeof(buf); i++) {
+		switch ((*str)[i]) {
 		case '\'':
 		case '#':
 		case '-':
 		case '+':
+		case '.':
 		case ' ':
 		case '0':
 		case '1':
@@ -167,12 +178,10 @@ static void copy_format(struct format *fmt, const char *str)
 		case 'd':
 		case 'i':
 		case 'o':
-			fmt->type = FMT_DECIMAL;
-			goto end;
 		case 'u':
 		case 'x':
 		case 'X':
-			fmt->type = FMT_UNSIGNED;
+			fmt->type = FMT_DECIMAL;
 			goto end;
 		case 'f':
 		case 'e':
@@ -187,15 +196,17 @@ static void copy_format(struct format *fmt, const char *str)
 		case 's':
 			fmt->type = FMT_STRING;
 			goto end;
+		/*
 		case 'b':
 			fmt->type = FMT_INTERP;
 			goto end;
 		case 'q':
 			fmt->type = FMT_POSIX;
 			goto end;
+		*/
 		default:
 			fprintf(stderr, "%s: %%%c: Invalid directive\n",
-				argv0, str[i]);
+				argv0, (*str)[i]);
 			exit(1);
 		}
 	}
@@ -206,22 +217,89 @@ static void copy_format(struct format *fmt, const char *str)
 	}
 
 end:
-	memcpy(buf, str, i);
-	buf[i] = '\0';
+	memcpy(buf, *str, i + 1);
+	buf[i + 1] = '\0';
+	*str += i + 1;
 }
 
 static void print_format(const struct format *fmt)
 {
-printf(":%s:\n", fmt->style);
+	union {
+		long num;
+		double flt;
+		char ch;
+		const char *str;
+	} u;
+	const char *arg;
 
-	/* TODO */
+	arg = next_arg();
+
+	switch (fmt->type) {
+	case FMT_DECIMAL:
+		if (arg)
+			u.num = strtol(arg, NULL, 0);
+		else
+			u.num = 0;
+
+		printf(fmt->style, u.num);
+		break;
+	case FMT_FLOAT:
+		if (arg)
+			u.flt = strtod(arg, NULL);
+		else
+			u.flt = 0.0;
+
+		printf(fmt->style, u.flt);
+		break;
+	case FMT_CHAR:
+		if (arg)
+			u.ch = arg[0];
+		else
+			u.ch = '\0';
+
+		printf(fmt->style, u.ch);
+		break;
+	case FMT_STRING:
+		if (arg)
+			u.str = arg;
+		else
+			u.str = "";
+
+		printf(fmt->style, u.str);
+		break;
+	default:
+		abort();
+	}
 }
 
-int main(int argc, const char *argv[])
+static void parse_format(const char *str)
 {
 	struct format fmt;
-	const char *str;
 
+	for (; *str; str++) {
+		switch (*str) {
+		case '\\':
+			str++;
+			print_escape(str);
+			break;
+		case '%':
+			if (str[1] == '%') {
+				putchar('%');
+			} else {
+				copy_format(&fmt, &str);
+				while (args.count)
+					print_format(&fmt);
+			}
+			break;
+		default:
+			putchar(*str);
+		}
+	}
+}
+
+/* Usage: printf FORMAT [ARG]... */
+int main(int argc, const char *argv[])
+{
 	if (argc < 2) {
 		fprintf(stderr, "%s: missing format string\n",
 			argv[0]);
@@ -229,29 +307,11 @@ int main(int argc, const char *argv[])
 	}
 
 	argv0 = argv[0];
-	str = argv[1];
+	args.count = argc - 2;
+	args.array = argv + 2;
 
-	for (; *str; str++) {
-		switch (*str) {
-		case '\\':
-			str++;
-			print_escape(str);
-			if (!*str)
-				return 0;
-			break;
-		case '%':
-			if (str[1] == '%') {
-				putchar('%');
-			} else {
-				copy_format(&fmt, str);
-				print_format(&fmt);
-			}
-			break;
-#if 0
-		default:
-			putchar(*str);
-#endif
-		}
-	}
+	while (args.count)
+		parse_format(argv[1]);
+
 	return 0;
 }
