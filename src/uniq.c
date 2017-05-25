@@ -15,8 +15,8 @@ static struct {
 	const char *argv0;
 	const char *input;
 	const char *output;
-	FILE *input_fn;
-	FILE *output_fn;
+	FILE *input_fh;
+	FILE *output_fh;
 	bool uniq  : 1;
 	bool count : 1;
 } opt;
@@ -104,7 +104,7 @@ static int print_count(void *arg, char *line, unsigned long count)
 
 	UNUSED(arg);
 
-	fprintf(opt.output_fn, "%4lu %s", count, line);
+	fprintf(opt.output_fh, "%4lu %s", count, line);
 	errsave = errno;
 	free(line);
 	errno = errsave;
@@ -118,7 +118,7 @@ static int print_only(void *arg, char *line, unsigned long count)
 	UNUSED(arg);
 	UNUSED(count);
 
-	fputs(line, opt.output_fn);
+	fputs(line, opt.output_fh);
 	errsave = errno;
 	free(line);
 	errno = errsave;
@@ -134,7 +134,7 @@ static int slurp_and_print(void)
 	do {
 		line = NULL;
 		len = 0;
-		if (getline(&line, &len, opt.input_fn) < 0) {
+		if (getline(&line, &len, opt.input_fh) < 0) {
 			free(line);
 			if (errno) {
 				fprintf(stderr, "%s: %s: %s\n",
@@ -167,14 +167,14 @@ static int print_non_unique(void)
 
 	line = NULL;
 	len = 0;
-	if (getline(&line, &len, opt.input_fn) < 0) {
+	if (getline(&line, &len, opt.input_fh) < 0) {
 		if (errno) {
 			fprintf(stderr, "%s: %s: %s\n",
 				opt.argv0, opt.input, strerror(errno));
 			free(line);
 			return 1;
 		}
-		if (fputs(line, opt.output_fn) == EOF) {
+		if (fputs(line, opt.output_fh) == EOF) {
 			fprintf(stderr, "%s: %s: %s\n",
 				opt.argv0, opt.output, strerror(errno));
 			free(line);
@@ -184,7 +184,7 @@ static int print_non_unique(void)
 		return 0;
 	}
 
-	if (fputs(line, opt.output_fn) == EOF) {
+	if (fputs(line, opt.output_fh) == EOF) {
 		fprintf(stderr, "%s: %s: %s\n",
 			opt.argv0, opt.output, strerror(errno));
 		return 1;
@@ -194,7 +194,7 @@ static int print_non_unique(void)
 	do {
 		line = NULL;
 		len = 0;
-		if (getline(&line, &len, opt.input_fn) < 0) {
+		if (getline(&line, &len, opt.input_fh) < 0) {
 			free(line);
 			if (errno) {
 				fprintf(stderr, "%s: %s: %s\n",
@@ -205,7 +205,7 @@ static int print_non_unique(void)
 		}
 
 		if (strcmp(line, last)) {
-			if (fputs(line, opt.output_fn) == EOF) {
+			if (fputs(line, opt.output_fh) == EOF) {
 				fprintf(stderr, "%s: %s: %s\n",
 					opt.argv0, opt.output, strerror(errno));
 				return 1;
@@ -256,26 +256,26 @@ int main(int argc, char *argv[])
 
 	/* Open files */
 	if (opt.input) {
-		opt.input_fn = fopen(opt.input, "r");
-		if (!opt.input_fn) {
+		opt.input_fh = fopen(opt.input, "r");
+		if (!opt.input_fh) {
 			fprintf(stderr, "%s: %s: %s\n",
 				argv[0], opt.input, strerror(errno));
 			return 1;
 		}
 	} else {
 		opt.input = "<stdin>";
-		opt.input_fn = stdin;
+		opt.input_fh = stdin;
 	}
 	if (opt.output) {
-		opt.output_fn = fopen(opt.output, "w");
-		if (!opt.output_fn) {
+		opt.output_fh = fopen(opt.output, "w");
+		if (!opt.output_fh) {
 			fprintf(stderr, "%s: %s: %s\n",
 				argv[0], opt.output, strerror(errno));
 			return 1;
 		}
 	} else {
 		opt.output = "<stdout>";
-		opt.output_fn = stdout;
+		opt.output_fh = stdout;
 	}
 
 	/* Read and print lines */
