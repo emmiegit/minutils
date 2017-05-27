@@ -8,7 +8,7 @@
 
 extern const char **environ;
 
-static void print_env(const char *environ[])
+static void print_env(void)
 {
 	const char **env;
 
@@ -16,16 +16,13 @@ static void print_env(const char *environ[])
 		puts(*env);
 }
 
-/* Usage: env [VARIABLE=value] program [ARGUMENTS] */
+/* Usage: env [VARIABLE=value] [PROGRAM [ARGUMENTS]] */
 int main(int argc, char *argv[])
 {
 	char *val;
 	int i;
 
-	if (argc == 1) {
-		print_env(environ);
-		return 0;
-	} else for (i = 1; i < argc; i++) {
+	for (i = 1; i < argc; i++) {
 		val = strchr(argv[i], '=');
 		if (!val)
 			break;
@@ -37,10 +34,12 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
-	if (execvp(argv[i], argv + i)) {
-		fprintf(stderr, "%s: %s: unable to exec: %s\n",
-			argv[0], argv[i], strerror(errno));
-		return 1;
+	if (i == argc) {
+		print_env();
+		return 0;
 	}
-	return 0;
+	execvp(argv[i], argv + i);
+	fprintf(stderr, "%s: %s: unable to exec: %s\n",
+		argv[0], argv[i], strerror(errno));
+	return 1;
 }
