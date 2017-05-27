@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
+extern const char **environ;
+
 static struct {
 	const char *argv0;
 	bool null : 1;
@@ -19,7 +21,7 @@ static int putnull(const char *str)
 	return 0;
 }
 
-static void print_all(const char *environ[])
+static void print_all(void)
 {
 	int (*print_func)(const char *);
 
@@ -78,7 +80,7 @@ static void print_vars(int len, const char *names[])
 }
 
 /* Usage: printenv [-0] [VARIABLE...] */
-int main(int argc, const char *argv[], const char *environ[])
+int main(int argc, const char *argv[])
 {
 	int i;
 
@@ -95,10 +97,9 @@ int main(int argc, const char *argv[], const char *environ[])
 		}
 	}
 
-	if (i == argc) {
-		print_all(environ);
-	} else {
+	if (i == argc)
+		print_all();
+	else
 		print_vars(argc - i, argv + i);
-	}
 	return 0;
 }

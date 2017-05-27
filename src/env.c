@@ -6,6 +6,8 @@
 #include <string.h>
 #include <unistd.h>
 
+extern const char **environ;
+
 static void print_env(const char *environ[])
 {
 	const char **env;
@@ -15,7 +17,7 @@ static void print_env(const char *environ[])
 }
 
 /* Usage: env [VARIABLE=value] program [ARGUMENTS] */
-int main(int argc, char *argv[], const char *environ[])
+int main(int argc, char *argv[])
 {
 	char *val;
 	int i;
