@@ -5,6 +5,7 @@
 
 #define DEFAULT_LINE_CAPACITY	32
 #define DEFAULT_CHAR_CAPACITY	64
+#define PORTION_LINES		10
 
 static const char *argv0;
 
@@ -130,14 +131,24 @@ int main(int argc, char *argv[])
 	}
 
 	free(line.array);
-#ifdef REVERSE_LINES
+#if defined(PORTION)
+	/* head */
+	for (i = 0; i < PORTION_LINES; i++) {
+# if PORTION == 0 /* head */
+		const size_t index = i;
+# else
+		const size_t index = lines.length - PORTION_LINES + i - 1;
+# endif /* PORTION */
+		puts(lines.array[index]);
+	}
+#elif defined(REVERSE_LINES)
+	/* tac */
 	for (i = lines.length - 1; i >= 0; i--)
-		printf("%s\n", lines.array[i]);
+		puts(lines.array[i]);
 #else
+	/* rev */
 	for (i = 0; i < (int)lines.length; i++) {
-		int j;
-
-		j = strlen(lines.array[i]) - 1;
+		int j = strlen(lines.array[i]) - 1;
 		for (; j >= 0; j--)
 			putchar(lines.array[i][j]);
 		if (i < (int)lines.length - 1)
