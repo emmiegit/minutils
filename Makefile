@@ -35,6 +35,10 @@ bin/%: src/%.s
 	@echo '[AS] $(@F)'
 	@$(CC) -s -nostdlib -o $@ $<
 
+bin/cmp: src/cmp.c
+	@echo '[CC] $(@F)';
+	@$(CC) $(FLAGS) $(CFLAGS) -Wno-implicit-fallthrough -o $@ $<
+
 clean:
 	@echo '[RM] bin'
 	@rm -rf bin
