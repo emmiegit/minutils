@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 {
 	int i, ch;
 
-	while ((ch = getopt(argc, argv, ":clw")) != -1) {
+	while ((ch = getopt(argc, argv, "clw")) != -1) {
 		switch (ch) {
 		case 'c':
 			opt.bytes = 1;
