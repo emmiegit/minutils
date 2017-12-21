@@ -58,7 +58,7 @@ static void append_to_char_list(char ch)
 		void *ptr;
 		size_t new_capacity;
 
-		new_capacity = lines.capacity * 2;
+		new_capacity = line.capacity * 2;
 		ptr = realloc(line.array, sizeof(char) * new_capacity);
 		if (!ptr) {
 			fprintf(stderr, "%s: %s\n",
@@ -80,15 +80,22 @@ int main(int argc, char *argv[])
 	lines.length = 0;
 	lines.capacity = DEFAULT_LINE_CAPACITY;
 
-	line.array = malloc(sizeof(char) * DEFAULT_CHAR_CAPACITY);
-	line.length = 0;
-	line.capacity = DEFAULT_CHAR_CAPACITY;
-
 	if (!lines.array) {
 		fprintf(stderr, "%s: %s\n",
 			argv[0], strerror(errno));
 		return 1;
 	}
+
+	line.array = malloc(sizeof(char) * DEFAULT_CHAR_CAPACITY);
+	line.length = 0;
+	line.capacity = DEFAULT_CHAR_CAPACITY;
+
+	if (!line.array) {
+		fprintf(stderr, "%s: %s\n",
+			argv[0], strerror(errno));
+		return 1;
+	}
+
 	if (argc == 1) {
 		int ch;
 
@@ -131,17 +138,7 @@ int main(int argc, char *argv[])
 	}
 
 	free(line.array);
-#if defined(PORTION)
-	/* head */
-	for (i = 0; i < PORTION_LINES; i++) {
-# if PORTION == 0 /* head */
-		const size_t index = i;
-# else
-		const size_t index = lines.length - PORTION_LINES + i - 1;
-# endif /* PORTION */
-		puts(lines.array[index]);
-	}
-#elif defined(REVERSE_LINES)
+#if defined(REVERSE_LINES)
 	/* tac */
 	for (i = lines.length - 1; i >= 0; i--)
 		puts(lines.array[i]);
