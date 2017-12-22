@@ -166,6 +166,7 @@ int main(int argc, char *argv[])
 					argv[0], optarg);
 				return 1;
 			}
+			break;
 		case '?':
 			return 1;
 		default:
