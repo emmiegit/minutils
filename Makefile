@@ -21,7 +21,7 @@ bin:
 	@mkdir -p bin
 
 bin/%: src/%.c
-	@if [[ ! -L $< ]]; then \
+	@if [ ! -L '$<' ]; then \
 		echo '[CC] $(@F)'; \
 		$(CC) $(FLAGS) $(CFLAGS) -o $@ $<; \
 	else \
