@@ -8,7 +8,11 @@ S_TARGETS := $(patsubst src/%.s,bin/%,$(S_SOURCES))
 
 TARGETS   := $(C_TARGETS) $(S_TARGETS)
 
-FLAGS     := -ansi -pedantic -Wall -Wextra -Wshadow -Wmissing-prototypes
+FLAGS     := \
+	-ansi -pedantic \
+	-W -Wall -Wextra -Wshadow -Wmissing-prototypes \
+	-Wundef -Wwrite-strings -Wcast-align -Wpointer-arith \
+	-Wstrict-prototypes -Wformat=2
 
 all: CFLAGS += -Os
 all: bin $(TARGETS)
