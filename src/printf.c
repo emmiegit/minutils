@@ -21,7 +21,8 @@ struct format {
 		FMT_DECIMAL,
 		FMT_FLOAT,
 		FMT_CHAR,
-		FMT_STRING
+		FMT_STRING,
+		FMT_NONE
 	} type;
 };
 
@@ -154,6 +155,7 @@ static void copy_format(struct format *fmt, const char **str)
 	static char buf[32];
 	size_t i;
 
+	fmt->type = FMT_NONE;
 	fmt->style = buf;
 
 	for (i = 1; (*str)[i] && i < sizeof(buf); i++) {
@@ -212,6 +214,12 @@ static void copy_format(struct format *fmt, const char **str)
 	}
 	if (i == sizeof(buf)) {
 		fprintf(stderr, "%s: format string too long\n",
+			argv0);
+		exit(1);
+	}
+
+	if (fmt->type == FMT_NONE) {
+		fprintf(stderr, "%s: format string has no type\n",
 			argv0);
 		exit(1);
 	}
