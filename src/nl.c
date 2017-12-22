@@ -1,18 +1,19 @@
 #define _POSIX_C_SOURCE		200809L
 
 #include <errno.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-/* Usage: nl FILE... */
+#define MAX(x, y)	(((x) > (y)) ? (x) : (y))
+#define MIN(x, y)	(((x) < (y)) ? (x) : (y))
+
+/* Usage: nl [FILE...] */
 int main(int argc, const char *argv[])
 {
 	struct {
 		FILE **array;
 		int len;
-		bool allocd : 1;
 	} files;
 	struct {
 		char *buf;
@@ -25,33 +26,29 @@ int main(int argc, const char *argv[])
 	line.len = 0;
 
 	/* Allocate file array */
-	if (argc < 2) {
-		FILE *_stdin = stdin;
-		files.array = &_stdin;
-		files.len = 1;
-		files.allocd = 0;
-	} else {
-		files.len = argc - 1;
-		files.array = malloc(files.len * sizeof(char *));
-		files.allocd = 1;
-		if (!files.array) {
-			fprintf(stderr, "%s: unable to allocate file array: %s\n",
-				argv[0], strerror(errno));
-			return 1;
-		}
+	files.len = MAX(1, argc - 1);
+	files.array = malloc(files.len * sizeof(char *));
+	if (!files.array) {
+		fprintf(stderr, "%s: unable to allocate file array: %s\n",
+			argv[0], strerror(errno));
+		return 1;
 	}
 
 	/* Open files */
-	for (i = 0; i < files.len; i++) {
-		if (strcmp(argv[i + 1], "-")) {
-			files.array[i] = fopen(argv[i + 1], "r");
-			if (!files.array[i]) {
-				fprintf(stderr, "%s: %s: unable to open\n",
-					argv[0], argv[i + 1]);
-				return 1;
+	if (argc < 2) {
+		files.array[0] = stdin;
+	} else {
+		for (i = 0; i < files.len; i++) {
+			if (!strcmp(argv[i + 1], "-")) {
+				files.array[i] = stdin;
+			} else {
+				files.array[i] = fopen(argv[i + 1], "r");
+				if (!files.array[i]) {
+					fprintf(stderr, "%s: %s: unable to open\n",
+						argv[0], argv[i + 1]);
+					return 1;
+				}
 			}
-		} else {
-			files.array[i] = stdin;
 		}
 	}
 
@@ -68,8 +65,7 @@ int main(int argc, const char *argv[])
 		fclose(files.array[i]);
 	}
 
-	if (files.allocd)
-		free(files.array);
+	free(files.array);
 	free(line.buf);
 	return 0;
 }
