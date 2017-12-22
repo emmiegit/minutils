@@ -2,7 +2,6 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/sysmacros.h>
 #include <sys/vfs.h>
 #include <pwd.h>
 #include <grp.h>
@@ -14,6 +13,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+
+#if !defined(__OpenBSD__) && !defined(__FreeBSD__)
+# include <sys/sysmacros.h>
+#endif /* !__OpenBSD__ && !__FreeBSD__ */
 
 static struct {
 	const char *argv0;

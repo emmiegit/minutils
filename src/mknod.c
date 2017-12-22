@@ -1,7 +1,6 @@
 #define _XOPEN_SOURCE	500
 
 #include <sys/stat.h>
-#include <sys/sysmacros.h>
 #include <sys/types.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -10,6 +9,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#if !defined(__OpenBSD__) && !defined(__FreeBSD__)
+# include <sys/sysmacros.h>
+#endif /* !__OpenBSD__ && !__FreeBSD__ */
 
 const char *argv0;
 
