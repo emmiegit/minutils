@@ -26,7 +26,8 @@ int main(int argc, const char *argv[])
 
 	/* Allocate file array */
 	if (argc < 2) {
-		files.array = &stdin;
+		FILE *_stdin = stdin;
+		files.array = &_stdin;
 		files.len = 1;
 		files.allocd = 0;
 	} else {
