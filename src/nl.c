@@ -27,7 +27,7 @@ int main(int argc, const char *argv[])
 
 	/* Allocate file array */
 	files.len = MAX(1, argc - 1);
-	files.array = malloc(files.len * sizeof(char *));
+	files.array = malloc(files.len * sizeof(FILE *));
 	if (!files.array) {
 		fprintf(stderr, "%s: unable to allocate file array: %s\n",
 			argv[0], strerror(errno));
