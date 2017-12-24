@@ -1,4 +1,4 @@
-#define _XOPEN_SOURCE	500
+#define _BSD_SOURCE 1
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -63,7 +63,7 @@ int main(int argc, const char *argv[])
 		DEV_SOCK,
 		DEV_REGULAR
 	} type;
-	unsigned int major, minor;
+	unsigned int majoor, minoor;
 	mode_t mode;
 	dev_t dev;
 	int i;
@@ -97,9 +97,9 @@ int main(int argc, const char *argv[])
 			argv[0]);
 		return 1;
 	case 4:
-		major = parse_int(argv[i + 2]);
-		minor = parse_int(argv[i + 3]);
-		dev = makedev(major, minor);
+		majoor = parse_int(argv[i + 2]);
+		minoor = parse_int(argv[i + 3]);
+		dev = makedev(majoor, minoor);
 		/* FALLTHROUGH */
 	case 2:
 		path = argv[i];

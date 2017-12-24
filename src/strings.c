@@ -9,14 +9,14 @@ static struct {
 	unsigned int min_len;
 } opt;
 
-static int isprint_lookahead(const char *buf, size_t index, size_t len)
+static int isprint_lookahead(const char *buf, size_t idx, size_t len)
 {
 	unsigned int i;
 
 	for (i = 1; i < opt.min_len; i++) {
-		if (index + i >= len)
+		if (idx + i >= len)
 			break;
-		if (!isprint(buf[index + i]))
+		if (!isprint(buf[idx + i]))
 			return 0;
 	}
 	return 1;
