@@ -95,7 +95,7 @@ static void print_statblock(const char *path, const struct stat *stbuf)
 	struct group *grp;
 	enum file_type type;
 	char mode[11], deviceinf[21];
-	char atime[32], mtime[32], ctime[32];
+	char atime[32], mtime[32], cctime[32];
 
 	pwd = getpwuid(stbuf->st_uid);
 	grp = getgrgid(stbuf->st_gid);
@@ -155,7 +155,7 @@ static void print_statblock(const char *path, const struct stat *stbuf)
 
 	get_time(atime, sizeof(atime), stbuf->st_atime);
 	get_time(mtime, sizeof(mtime), stbuf->st_mtime);
-	get_time(ctime, sizeof(ctime), stbuf->st_ctime);
+	get_time(cctime, sizeof(cctime), stbuf->st_ctime);
 
 	printf("  File: %s\n"
 	       "  Size: %ld\t\tBlocks: %ld\t   IO Block: %ld   %s\n"
@@ -183,7 +183,7 @@ static void print_statblock(const char *path, const struct stat *stbuf)
 	       (grp) ? grp->gr_name : "???",
 	       atime,
 	       mtime,
-	       ctime,
+	       cctime,
 	       "-");
 }
 
