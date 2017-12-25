@@ -1,4 +1,4 @@
-#define _XOPEN_SOURCE	500
+#define _BSD_SOURCE 1
 
 #include <sys/types.h>
 #include <sys/stat.h>
